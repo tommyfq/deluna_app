@@ -9,6 +9,7 @@ class DashboardController extends Controller {
     public function index(Request $request) {
         $param = array();
         $param['_title'] = 'Deluna | Dashboard';
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index')];
         
         $viewtarget = "pages.dashboard.index";
         $content = view($viewtarget, $param);

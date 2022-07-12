@@ -26,3 +26,4 @@
 
     })(jQuery);
 </script>
+@stack('scripts')
