@@ -15,11 +15,17 @@ use App\Http\Controllers\UserController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('login', [AuthController::class, 'index'])->name('login.index');
+Route::prefix('login')->group(function(){
+    Route::get('/', [AuthController::class, 'index'])->name('login.index');
+    Route::post('/', [AuthController::class, 'doLogin'])->name('login.post');
+});
+Route::get('logout', [AuthController::class, 'doLogout'])->name('logout.index');
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
-Route::prefix('user')->group(function(){
-    Route::get('/', [UserController::class, 'index'])->name('user.index');
-    Route::get('add', [UserController::class, 'add'])->name('user.add');
-    Route::post('/', [UserController::class, 'store'])->name('user.store');
+Route::middleware('check.user')->group(function(){
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::prefix('user')->group(function(){
+        Route::get('/', [UserController::class, 'index'])->name('user.index');
+        Route::get('add', [UserController::class, 'add'])->name('user.add');
+        Route::post('/', [UserController::class, 'store'])->name('user.store');
+    });
 });

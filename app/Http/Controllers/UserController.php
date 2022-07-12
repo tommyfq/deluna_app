@@ -10,6 +10,9 @@ use App\Models\User;
 
 class UserController extends Controller {
 
+    public function __construct(){
+	}
+
     public function index(Request $request) {
         $param = array();
         $param['_title'] = 'Deluna | Users Menu';
