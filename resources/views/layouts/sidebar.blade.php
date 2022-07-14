@@ -16,6 +16,9 @@
                 <ul aria-expanded="false">
                     <li><a href="{{route('user.index')}}">User</a></li>
                 </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{route('vendor.index')}}">Vendor</a></li>
+                </ul>
             </li>
         </ul>
     </div>

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VendorController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,5 +28,9 @@ Route::middleware('check.user')->group(function(){
         Route::get('/', [UserController::class, 'index'])->name('user.index');
         Route::get('add', [UserController::class, 'add'])->name('user.add');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
+    });
+    Route::prefix('vendor')->group(function(){
+        Route::get('/', [VendorController::class, 'index'])->name('vendor.index');
+        Route::get('/list', [VendorController::class, 'getVendors'])->name('vendor.list');
     });
 });
