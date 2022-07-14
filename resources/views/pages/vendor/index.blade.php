@@ -1,6 +1,5 @@
 @push('styles')
-<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{asset('plugins/tables/css/datatable/dataTables.bootstrap4.min.css')}}">
 @endpush
 <div class="container-fluid">
     <div class="row">
@@ -14,7 +13,7 @@
                             <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete User.</p>
                         </div>
                         <div class="col">
-                            <a href="{{route('user.add')}}" class="btn mb-1 btn-primary float-right">Add User</a>
+                            <a href="{{route('vendor.add')}}" class="btn mb-1 btn-primary float-right">Add Vendor</a>
                         </div>
                     </div>
                     <div class="row">
@@ -25,7 +24,7 @@
                                         <tr>
                                             <th scope="col">Name</th>
                                             <th scope="col">Slug</th>
-                                            <th scope="col">Description</th>
+                                            <th scope="col">Address</th>
                                             <th scope="col">Phone</th>
                                             <th scope="col">Status</th>
                                             <th scope="col">Action</th>
@@ -41,11 +40,11 @@
     </div>
 </div>
 @push('scripts')
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.js"></script>
-<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+<script src="{{asset('plugins/jqueury/jquery.min.js')}}"></script>
+<script src="{{asset('plugins/tables/js/jquery.dataTables.min.js')}}"></script>
+<script src="{{asset('plugins/tables/js/datatable/dataTables.bootstrap4.min.js')}}"></script>
+<script src="{{asset('plugins/tables/js/datatable-init/datatable-basic.min.js')}}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
         var table = $('.yajra-datatable').DataTable({
@@ -55,14 +54,14 @@
           columns: [
               {data: 'name', name: 'name'},
               {data: 'slug', name: 'slug'},
-              {data: 'description', name: 'description'},
+              {data: 'address', name: 'address'},
               {data: 'phone', name: 'phone'},
               {data: 'status', name: 'status'},
               {
                   data: 'action', 
                   name: 'action', 
-                  orderable: true, 
-                  searchable: true
+                  orderable: false, 
+                  searchable: false
               },
           ]
       });

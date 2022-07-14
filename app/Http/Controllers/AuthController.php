@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use DB;
 
 use App\Models\User;
 
@@ -43,8 +44,12 @@ class AuthController extends Controller {
             return redirect()->back()->withErrors($validator);
         }
         // check user
-        $check = User::where('email', $request->email)->where('password', md5($request->password))->first();
+        $check = User::where('email', $request->email)->first();
         if(!$check){
+            if($check->password != md5($password)){
+                Session::flash('message.error', "Wrong username or password");
+                return redirect()->back();
+            }
             Session::flash('message.error', "Account doesn't exists!");
             return redirect()->back();
         }

@@ -26,33 +26,85 @@ class VendorController extends Controller {
 
     public function getVendors(Request $request)
     {
-        dd($request);
+        //dd($request);
         if ($request->ajax()) {
-            $data = Vendor::get();
-            return Datatables::of($data)
-                ->addIndexColumn()
-                ->addColumn('action', function($row){
-                    $actionBtn = `
-                        <a href="#" data-toggle="tooltip" data-placement="top" title="Edit">
-                            <i class="fa fa-pencil color-muted m-r-5"></i> 
-                        </a>
-                        <a href="#" data-toggle="tooltip" data-placement="top" title="Close">
-                            <i class="fa fa-close color-danger"></i>
-                        </a>
-                        `;
-                    return $actionBtn;
-                })
-                ->rawColumns(['action'])
-                ->make(true);
+            $columns = array(
+                0 =>'name',
+                1 =>'slug',
+                2 =>'address',
+                3 =>'phone',
+                4 =>'status',
+            );
+
+            $totalData = Vendor::where(function($query){
+                $query->where('status',1);
+            })->count();
+            
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')];
+            $dir = $request->input('order.0.dir');
+
+            $models =  Vendor::where(function($query){
+                $query->where('status',1);
+            });
+            if(!empty($request->input('search.value'))){
+                $models->where(function($query){
+                    $query->where('name','LIKE',"%{$search}%")
+                        ->orWhere('address', 'LIKE',"%{$search}%")
+                        ->orWhere('phone', 'LIKE',"%{$search}%");
+                });
+
+                $totalFiltered = Vendor::where(function($query) use ($search){
+                        $query->where('name','LIKE',"%{$search}%")
+                            ->orWhere('address', 'LIKE',"%{$search}%")
+                            ->orWhere('phone', 'LIKE',"%{$search}%");
+                    })
+                    ->where(function($query){
+                        $query->where('status',1);
+                    })
+                    ->count();
+            }
+
+            $models = $models->offset($start)
+                    ->limit($limit)
+                    ->orderBy($order,$dir)
+                    ->get();
+
+            $data = $models->toArray();
+
+            if(!empty($data)){
+                for($i = 0; $i < count($data); $i++){
+                    $data[$i]['action'] = '
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Edit">
+                        <i class="fa fa-pencil color-muted m-r-5"></i> 
+                    </a>
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Close">
+                        <i class="fa fa-close color-danger"></i>
+                    </a>
+                    ';
+                }
+            }
+
+            $json_data = array(
+                "draw"            => intval($request->input('draw')),
+                "recordsTotal"    => intval($totalData),
+                "recordsFiltered" => intval($totalFiltered),
+                "data"            => $data
+            );
+
+            return json_encode($json_data);
         }
     }
 
     public function add() {
         $param = array();
-        $param['_title'] = 'Deluna | Add User';
-        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'User' => route('user.index'), 'Add' => route('user.add')];
+        $param['_title'] = 'Deluna | Add Vendor';
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'Vendor' => route('vendor.index'), 'Add' => route('vendor.add')];
         
-        $viewtarget = "pages.user.add";
+        $viewtarget = "pages.vendor.add";
         $content = view($viewtarget, $param);
         $param['CONTENT'] = $content;
         return view('layouts.master', $param);

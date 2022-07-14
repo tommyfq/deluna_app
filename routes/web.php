@@ -35,5 +35,7 @@ Route::middleware('check.user')->group(function(){
     Route::prefix('vendor')->group(function(){
         Route::get('/', [VendorController::class, 'index'])->name('vendor.index');
         Route::get('/list', [VendorController::class, 'getVendors'])->name('vendor.list');
+        Route::get('add', [VendorController::class, 'add'])->name('vendor.add');
+        Route::post('/', [VendorController::class, 'store'])->name('vendor.store');
     });
 });
