@@ -1,4 +1,4 @@
-@if($_breadcrumbs)
+@if(isset($_breadcrumbs))
     <div class="row page-titles mx-0">
         <div class="col p-md-0">
             <ol class="breadcrumb">
