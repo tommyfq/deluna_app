@@ -28,6 +28,9 @@ Route::middleware('check.user')->group(function(){
         Route::get('/', [UserController::class, 'index'])->name('user.index');
         Route::get('add', [UserController::class, 'add'])->name('user.add');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
+        Route::get('/edit/{slug}', [UserController::class, 'edit'])->name('user.edit');
+        Route::put('/{slug}', [UserController::class, 'update'])->name('user.update');
+        Route::get('/delete/{slug}', [UserController::class, 'delete'])->name('user.delete');
     });
     Route::prefix('vendor')->group(function(){
         Route::get('/', [VendorController::class, 'index'])->name('vendor.index');
