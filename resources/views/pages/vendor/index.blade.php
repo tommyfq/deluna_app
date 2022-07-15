@@ -56,7 +56,7 @@
               {data: 'slug', name: 'slug'},
               {data: 'address', name: 'address'},
               {data: 'phone', name: 'phone'},
-              {data: 'status', name: 'status'},
+              {data: 'is_active', name: 'status'},
               {
                   data: 'action', 
                   name: 'action', 

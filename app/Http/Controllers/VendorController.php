@@ -33,11 +33,11 @@ class VendorController extends Controller {
                 1 =>'slug',
                 2 =>'address',
                 3 =>'phone',
-                4 =>'status',
+                4 =>'is_active',
             );
 
             $totalData = Vendor::where(function($query){
-                $query->where('status',1);
+                $query->where('is_active',1);
             })->count();
             
             $totalFiltered = $totalData;
@@ -49,9 +49,10 @@ class VendorController extends Controller {
             $search = $request->input('search.value');
 
             $models =  Vendor::where(function($query){
-                $query->where('status',1);
+                $query->where('is_active',1);
             });
             if(!empty($request->input('search.value'))){
+                $search = $request->input('search.value');
                 $models->where(function($query) use ($search){
                     $query->where('name','LIKE',"%{$search}%")
                         ->orWhere('address', 'LIKE',"%{$search}%")
@@ -64,7 +65,7 @@ class VendorController extends Controller {
                             ->orWhere('phone', 'LIKE',"%{$search}%");
                     })
                     ->where(function($query){
-                        $query->where('status',1);
+                        $query->where('is_active',1);
                     })
                     ->count();
             }
@@ -115,9 +116,9 @@ class VendorController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
-            'email' => 'required',
-            'password' => 'required',
-            'confirm_password' => 'required|same:password'
+            'slug' => 'required',
+            'address' => 'required',
+            'phone' => 'required | regex:/^([0-9\s\-\+\(\)]*)$/ | min:10'
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
@@ -125,25 +126,29 @@ class VendorController extends Controller {
         ];
         $validator = Validator::make($request->all(), $rules, $custom);
         if($validator->fails()){
-            return redirect()->back()->withErrors($validator);
+            return redirect()->back()->withInput()->withErrors($validator);
         }
-        // check if user exist
-        $check = User::where('email',$request->email)->first();
+        
+        $param = $request->all();
+        unset($param['_token']);
+
+        // check if vendor exist
+        $check = Vendor::where('slug',$request->slug)->orWhere('name',$request->name)->first();
         if($check){
-            Session::flash('message.error', 'Account already exists!');
-            return redirect()->back();
+            Session::flash('message.error', 'Vendor already exists!');
+            return redirect()->back()->withInput();
         }
-        // create new user
-        $user = new User;
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = md5($request->password);
-        if($user->save()){
+        
+        $param['is_active'] = $param['is_active'] === 'true' ? true: false;
+        $param['created_by'] = Session::get('user')->id;
+        $result = Vendor::create($param);
+        
+        if($result->wasRecentlyCreated === true){
             Session::flash('message.success', 'Account has been created!');
-            return redirect()->route('user.index');
-        } else {
+            return redirect()->route('vendor.index');
+        }else{
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
-            return redirect()->back();
+            return redirect()->back()->withInput();
         }
     }
 

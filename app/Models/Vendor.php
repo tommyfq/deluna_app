@@ -12,7 +12,7 @@ class Vendor extends Model
         'description',
         'address',
         'phone',
-        'status',
+        'is_active',
         'created_by',
         'updated_by'
     ];
