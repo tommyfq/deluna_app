@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\CategoryController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,5 +39,14 @@ Route::middleware('check.user')->group(function(){
         Route::get('/list', [VendorController::class, 'get'])->name('vendor.list');
         Route::get('add', [VendorController::class, 'add'])->name('vendor.add');
         Route::post('/', [VendorController::class, 'store'])->name('vendor.store');
+    });
+    Route::prefix('category')->group(function(){
+        Route::get('/', [CategoryController::class, 'index'])->name('category.index');
+        Route::get('/list', [CategoryController::class, 'get'])->name('category.list');
+        Route::get('add', [CategoryController::class, 'add'])->name('category.add');
+        Route::post('/', [CategoryController::class, 'store'])->name('category.store');
+        Route::get('/edit/{slug}', [CategoryController::class, 'edit'])->name('category.edit');
+        Route::put('/{slug}', [CategoryController::class, 'update'])->name('category.update');
+        Route::get('/delete/{slug}', [CategoryController::class, 'delete'])->name('category.delete');
     });
 });

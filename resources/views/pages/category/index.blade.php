@@ -9,11 +9,11 @@
                     @include('_includes.alert')
                     <div class="row">
                         <div class="col">
-                            <h4 class="card-title">User Menu</h4>
-                            <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete User.</p>
+                            <h4 class="card-title">Category Menu</h4>
+                            <p class="text-muted m-b-15 f-s-12">You can see the list of categories, add, edit and delete Category.</p>
                         </div>
                         <div class="col">
-                            <a href="{{route('user.add')}}" class="btn mb-1 btn-primary float-right">Add User</a>
+                            <a href="{{route('category.add')}}" class="btn mb-1 btn-primary float-right">Add Category</a>
                         </div>
                     </div>
                     <div class="row">
@@ -23,7 +23,7 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">Name</th>
-                                            <th scope="col">Email</th>
+                                            <th scope="col">Type</th>
                                             <th scope="col">Active</th>
                                             <th scope="col">Action</th>
                                         </tr>
@@ -48,10 +48,10 @@
         var table = $('.yajra-datatable').DataTable({
           processing: true,
           serverSide: true,
-          ajax: "{{ route('user.list') }}",
+          ajax: "{{ route('category.list') }}",
           columns: [
               {data: 'name', name: 'name'},
-              {data: 'email', name: 'email'},
+              {data: 'type', name: 'type'},
               {data: 'is_active', name: 'active'},
               {
                   data: 'action', 
