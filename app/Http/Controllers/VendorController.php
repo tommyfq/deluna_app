@@ -11,16 +11,20 @@ use DataTables;
 
 class VendorController extends Controller {
 
+    private $page = 'vendor';
     public function __construct(){}
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $param = array();
-        $param['_title'] = 'Deluna | Vendors Menu';
-        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'Vendor' => route('vendor.index')];
-        
-        $viewtarget = "pages.vendor.index";
+        $param['_title'] = 'Deluna | '.ucwords($this->page).'s Menu';
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
+        $param['_page'] = $this->page;
+
+        $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
         $param['CONTENT'] = $content;
+        
         return view('layouts.master', $param);
     }
 
@@ -36,9 +40,7 @@ class VendorController extends Controller {
                 4 =>'is_active',
             );
 
-            $totalData = Vendor::where(function($query){
-                $query->where('is_active',1);
-            })->count();
+            $totalData = Vendor::count();
             
             $totalFiltered = $totalData;
 
@@ -48,9 +50,7 @@ class VendorController extends Controller {
             $dir = $request->input('order.0.dir');
             $search = $request->input('search.value');
 
-            $models =  Vendor::where(function($query){
-                $query->where('is_active',1);
-            });
+            $models =  Vendor::where(function($query){});
             if(!empty($request->input('search.value'))){
                 $search = $request->input('search.value');
                 $models->where(function($query) use ($search){
@@ -63,11 +63,7 @@ class VendorController extends Controller {
                         $query->where('name','LIKE',"%{$search}%")
                             ->orWhere('address', 'LIKE',"%{$search}%")
                             ->orWhere('phone', 'LIKE',"%{$search}%");
-                    })
-                    ->where(function($query){
-                        $query->where('is_active',1);
-                    })
-                    ->count();
+                    })->count();
             }
 
             $models = $models->offset($start)
@@ -79,11 +75,16 @@ class VendorController extends Controller {
 
             if(!empty($data)){
                 for($i = 0; $i < count($data); $i++){
+                    $data[$i]['is_active'] = $data[$i]['is_active'] == 1 ? 
+                    '<i class="fa fa-check text-success">'
+                    :
+                    '<i class="fa fa-close text-danger">';
+                    
                     $data[$i]['action'] = '
-                    <a href="#" data-toggle="tooltip" data-placement="top" title="Edit">
+                    <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="fa fa-pencil color-muted m-r-5"></i> 
                     </a>
-                    <a href="#" data-toggle="tooltip" data-placement="top" title="Close">
+                    <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-name="'.$data[$i]['name'].'" class="btn-delete" data-toggle="tooltip" data-placement="top" title="Close">
                         <i class="fa fa-close color-danger"></i>
                     </a>
                     ';
@@ -101,18 +102,21 @@ class VendorController extends Controller {
         }
     }
 
-    public function add() {
+    public function add() 
+    {
         $param = array();
-        $param['_title'] = 'Deluna | Add Vendor';
-        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'Vendor' => route('vendor.index'), 'Add' => route('vendor.add')];
-        
-        $viewtarget = "pages.vendor.add";
+        $param['_title'] = 'Deluna | Add '.ucwords($this->page);
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
+        $param['_page'] = $this->page;
+
+        $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
         $param['CONTENT'] = $content;
         return view('layouts.master', $param);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         // validation
         $rules = [
             'name' => 'required',
@@ -122,7 +126,6 @@ class VendorController extends Controller {
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
-            'same' => 'The :attribute and :other must match.',
         ];
         $validator = Validator::make($request->all(), $rules, $custom);
         if($validator->fails()){
@@ -130,12 +133,13 @@ class VendorController extends Controller {
         }
         
         $param = $request->all();
+        $param['phone'] = '+62'.$param['phone'];
         unset($param['_token']);
 
         // check if vendor exist
         $check = Vendor::where('slug',$request->slug)->orWhere('name',$request->name)->first();
         if($check){
-            Session::flash('message.error', 'Vendor already exists!');
+            Session::flash('message.error', ucwords($this->page).' already exists!');
             return redirect()->back()->withInput();
         }
         
@@ -144,11 +148,93 @@ class VendorController extends Controller {
         $result = Vendor::create($param);
         
         if($result->wasRecentlyCreated === true){
-            Session::flash('message.success', 'Account has been created!');
-            return redirect()->route('vendor.index');
+            Session::flash('message.success', ucwords($this->page).' has been created!');
+            return redirect()->route($this->page.'.index');
         }else{
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back()->withInput();
+        }
+    }
+
+    public function edit($slug)
+    {
+        $param = array();
+        $param['_title'] = 'Deluna | Edit User';
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
+        $param['_page'] = $this->page;
+
+        $selected = Vendor::where('id', $slug)->first();
+        if(!$selected){
+            Session::flash('message.error', "Data not found!");
+            return redirect()->route($this->page.'.index');
+        }
+        $selected->is_active = $selected->is_active == 1 ? 'true' : 'false';
+        $selected->phone = str_replace('+62','',$selected->phone);
+        $param['data'] = $selected;
+        $viewtarget = "pages.".$this->page.".edit";
+        $content = view($viewtarget, $param);
+        $param['CONTENT'] = $content;
+        return view('layouts.master', $param);
+    }
+    
+    public function update(Request $request, $slug)
+    {
+        // validation
+        $rules = [
+            'name' => 'required',
+            'slug' => 'required',
+            'address' => 'required',
+            'phone' => 'required | regex:/^([0-9\s\-\+\(\)]*)$/ | min:10'
+        ];
+        $custom = [
+            'required' => 'The :attribute field is required.',
+        ];
+        $validator = Validator::make($request->all(), $rules, $custom);
+        if($validator->fails()){
+            return redirect()->back()->withErrors($validator);
+        }
+        // check if user exist
+        $user = Vendor::find($slug);
+        if(!$user){
+            Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
+            return redirect()->back();
+        }
+        // update user
+        $param = $request->all();
+        $param['phone'] = '+62'.$param['phone'];
+        unset($param['_token']);
+        unset($param['_method']);
+        $param['is_active'] = $param['is_active'] === 'true' ? true: false;
+        $param['updated_by'] = Session::get('user')->id;
+        $result = Vendor::where('id', $slug)->update($param);
+        if($result){
+            Session::flash('message.success', ucwords($this->page).' has been updated!');
+            return redirect()->route($this->page.'.index');
+        } else {
+            Session::flash('message.error', 'Sorry there is an error while saving the data!');
+            return redirect()->back();
+        }
+    }
+
+    public function delete($slug)
+    {
+        if(!$slug){
+            Session::flash('message.error', 'No data selected!');
+            return redirect()->back();
+        }
+        // check if user exist
+        $data = Vendor::find($slug);
+        if(!$data){
+            Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
+            return redirect()->back();
+        }
+        Vendor::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+        if($data->delete()){
+            Session::flash('message.success', ucwords($this->page).' has been deleted!');
+            return redirect()->route($this->page.'.index');
+        } else {
+            Session::flash('message.error', 'Sorry there is an error while delete the data!');
+            return redirect()->back();
         }
     }
 

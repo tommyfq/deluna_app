@@ -207,8 +207,8 @@ class UserController extends Controller {
             Session::flash('message.error', 'Account doesn\'t exists!');
             return redirect()->back();
         }
-        $delete = User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id, 'is_active' => 0]);
-        if($delete){
+        User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+        if($user->delete()){
             Session::flash('message.success', 'Account has been deleted!');
             return redirect()->route('user.index');
         } else {

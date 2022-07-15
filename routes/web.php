@@ -39,6 +39,9 @@ Route::middleware('check.user')->group(function(){
         Route::get('/list', [VendorController::class, 'get'])->name('vendor.list');
         Route::get('add', [VendorController::class, 'add'])->name('vendor.add');
         Route::post('/', [VendorController::class, 'store'])->name('vendor.store');
+        Route::get('/edit/{slug}', [VendorController::class, 'edit'])->name('vendor.edit');
+        Route::put('/{slug}', [VendorController::class, 'update'])->name('vendor.update');
+        Route::get('/delete/{slug}', [VendorController::class, 'delete'])->name('vendor.delete');
     });
     Route::prefix('category')->group(function(){
         Route::get('/', [CategoryController::class, 'index'])->name('category.index');

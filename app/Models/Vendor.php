@@ -18,4 +18,14 @@ class Vendor extends Model
     ];
 
     public $timestamps = true;
+
+    public function user_create()
+    {
+        return $this->belongsTo(User::class, 'id', 'created_by');
+    }
+
+    public function user_update()
+    {
+        return $this->belongsTo(User::class, 'id', 'updated_by');
+    }
 }

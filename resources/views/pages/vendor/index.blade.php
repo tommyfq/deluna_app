@@ -9,11 +9,11 @@
                     @include('_includes.alert')
                     <div class="row">
                         <div class="col">
-                            <h4 class="card-title">Vendors Menu</h4>
-                            <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete Vendor.</p>
+                            <h4 class="card-title">{{ucwords($_page)}}s Menu</h4>
+                            <p class="text-muted m-b-15 f-s-12">You can see the list of {{$_page}}s, add, edit and delete {{ucwords($_page)}}.</p>
                         </div>
                         <div class="col">
-                            <a href="{{route('vendor.add')}}" class="btn mb-1 btn-primary float-right">Add Vendor</a>
+                            <a href="{{route($_page.'.add')}}" class="btn mb-1 btn-primary float-right">Add {{ucwords($_page)}}</a>
                         </div>
                     </div>
                     <div class="row">
@@ -39,6 +39,21 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="basicModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modal-title" class="modal-title">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <a id="modal-save" href="#"><button type="button" class="btn btn-primary">Save changes</button></a>
+            </div>
+        </div>
+    </div>
+</div>
 @push('scripts')
 
 <script src="{{asset('plugins/jqueury/jquery.min.js')}}"></script>
@@ -50,7 +65,7 @@
         var table = $('.yajra-datatable').DataTable({
           processing: true,
           serverSide: true,
-          ajax: "{{ route('vendor.list') }}",
+          ajax: "{{ route($_page.'.list') }}",
           columns: [
               {data: 'name', name: 'name'},
               {data: 'slug', name: 'slug'},
@@ -64,6 +79,15 @@
                   searchable: false
               },
           ]
+      });
+
+      $(document).on("click",".btn-delete",function(e) {
+        e.preventDefault();
+        var name = $(this).data('name');
+        var url = $(this).attr('href');
+        $('#modal-title').text('Are you sure want to delete '+name+' ?');
+        $('#modal-save').attr('href',url);
+        $('#basicModal').modal('show');
       });
     })
 </script>

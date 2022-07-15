@@ -5,20 +5,21 @@
                 <div class="card-body">
                     @include('_includes.alert')
                     <div class="form-validation">
-                        <form class="form-valide" action="{{route($_page.'.store')}}" method="post">
+                        <form class="form-valide" action="{{route($_page.'.update',[$data->id])}}" method="post">
+                            @method('put')
                             @csrf
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="name">Name <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter Vendor Name" value="{{old('name')}}">
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter Vendor Name" value="{{old('name') ? old('name') : $data->name}}">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="slug">Slug <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="Enter Slug" value={{old('slug')}}>
+                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="Enter Slug" value={{old('slug') ? old('slug') : $data->slug}}>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -27,30 +28,37 @@
                                 <div class="col-lg-6 input-group mb-3">
                                     <div class="input-group-prepend"><span class="input-group-text">+62</span>
                                     </div>
-                                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter Phone" value={{old('phone')}}>
+                                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter Phone" value={{old('phone') ? old('phone') : $data->phone}}>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="address">Address <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <textarea class="form-control" id="address" name="address" placeholder="Enter Address">{{old('address')}}</textarea>
+                                    <textarea class="form-control" id="address" name="address" placeholder="Enter Address">{{old('address') ? old('address') : $data->address}}</textarea>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="description">Description
                                 </label>
                                 <div class="col-lg-6">
-                                    <textarea class="form-control" id="description" name="description" placeholder="Enter Description">{{old('description')}}</textarea>
+                                    <textarea class="form-control" id="description" name="description" placeholder="Enter Description">{{old('description') ? old('description') : $data->description}}</textarea>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="is_active">Active</label>
                                 <div class="col-lg-6">
-                                    <label class="radio-inline mr-3">
-                                        <input type="radio" name="is_active" value="true" checked>Active</label>
-                                    <label class="radio-inline mr-3">
-                                        <input type="radio" name="is_active" value="false">Inactive</label>
+                                    @if(old('is_active'))
+                                        <label class="radio-inline mr-3">
+                                            <input type="radio" name="is_active" value="true" {{old('is_active') =='true' ? 'checked' : ''}}>Active</label>
+                                        <label class="radio-inline mr-3">
+                                            <input type="radio" name="is_active" value="false" {{old('is_active') =='false' ? 'checked' : ''}}>Inactive</label>
+                                    @else
+                                        <label class="radio-inline mr-3">
+                                            <input type="radio" name="is_active" value="true" {{$data->is_active =='true' ? 'checked' : ''}}>Active</label>
+                                        <label class="radio-inline mr-3">
+                                            <input type="radio" name="is_active" value="false" {{$data->is_active =='false' ? 'checked' : ''}}>Inactive</label>
+                                    @endif
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -77,8 +85,8 @@
                         .toLowerCase()
                     );
             })
-            $('#phone').keypress(function () {
-                this.value = this.value.replace(/[^0-9]/g,'');
+            $('#phone').keyup(function () { 
+                this.value = this.value.replace(/[^0-9\.]/g,'');
             });
         })
     </script>
