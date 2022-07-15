@@ -46,12 +46,13 @@ class VendorController extends Controller {
             $start = $request->input('start');
             $order = $columns[$request->input('order.0.column')];
             $dir = $request->input('order.0.dir');
+            $search = $request->input('search.value');
 
             $models =  Vendor::where(function($query){
                 $query->where('status',1);
             });
             if(!empty($request->input('search.value'))){
-                $models->where(function($query){
+                $models->where(function($query) use ($search){
                     $query->where('name','LIKE',"%{$search}%")
                         ->orWhere('address', 'LIKE',"%{$search}%")
                         ->orWhere('phone', 'LIKE',"%{$search}%");
