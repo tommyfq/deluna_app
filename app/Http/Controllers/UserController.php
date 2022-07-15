@@ -30,7 +30,7 @@ class UserController extends Controller {
             $columns = array(
                 0 =>'name',
                 1 =>'email',
-                2 =>'status',
+                2 =>'is_active',
                 3 =>'id',
             );
 
@@ -45,7 +45,7 @@ class UserController extends Controller {
             $search = $request->input('search.value');
 
             $models =  User::where(function($query){
-                $query->where('status',1);
+                $query->where('is_active',1);
             });
             if(!empty($search)){
                 $models->where(function($query) use ($search){
@@ -58,7 +58,7 @@ class UserController extends Controller {
                         ->orWhere('email', 'LIKE',"%{$search}%");
                     })
                     ->where(function($query){
-                        $query->where('status',1);
+                        $query->where('is_active',1);
                     })
                     ->count();
             }
@@ -132,7 +132,7 @@ class UserController extends Controller {
         $user->email = $request->email;
         $user->password = md5($request->password);
         $user->created_by = Session::get('user')->id;
-        $user->status = 1;
+        $user->is_active = 1;
         if($user->save()){
             Session::flash('message.success', 'Account has been created!');
             return redirect()->route('user.index');
@@ -147,7 +147,7 @@ class UserController extends Controller {
         $param['_title'] = 'Deluna | Edit User';
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'User' => route('user.index'), 'Edit' => route('user.edit',[$slug])];
 
-        $user = User::where('id',$slug)->first();
+        $user = User::where(['id' => $slug, 'is_active' => 1])->first();
         if(!$user){
             Session::flash('message.error', "Data not found!");
             return redirect()->route('user.index');
@@ -207,7 +207,7 @@ class UserController extends Controller {
             Session::flash('message.error', 'Account doesn\'t exists!');
             return redirect()->back();
         }
-        $delete = User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id, 'status' => 0]);
+        $delete = User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id, 'is_active' => 0]);
         if($delete){
             Session::flash('message.success', 'Account has been deleted!');
             return redirect()->route('user.index');

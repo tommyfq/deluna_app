@@ -52,7 +52,7 @@
           columns: [
               {data: 'name', name: 'name'},
               {data: 'email', name: 'email'},
-              {data: 'status', name: 'status'},
+              {data: 'is_active', name: 'active'},
               {
                   data: 'action', 
                   name: 'action', 
