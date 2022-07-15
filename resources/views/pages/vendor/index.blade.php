@@ -10,7 +10,7 @@
                     <div class="row">
                         <div class="col">
                             <h4 class="card-title">Vendors Menu</h4>
-                            <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete User.</p>
+                            <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete Vendor.</p>
                         </div>
                         <div class="col">
                             <a href="{{route('vendor.add')}}" class="btn mb-1 btn-primary float-right">Add Vendor</a>

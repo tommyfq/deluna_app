@@ -24,6 +24,75 @@ class UserController extends Controller {
         return view('layouts.master', $param);
     }
 
+    public function getUser(Request $request)
+    {
+        if ($request->ajax()) {
+            $columns = array(
+                0 =>'name',
+                1 =>'email',
+                2 =>'status',
+                3 =>'id',
+            );
+
+            $totalData = User::count();
+            
+            $totalFiltered = $totalData;
+
+            $limit = $request->input('length');
+            $start = $request->input('start');
+            $order = $columns[$request->input('order.0.column')];
+            $dir = $request->input('order.0.dir');
+            $search = $request->input('search.value');
+
+            $models =  User::where(function($query){
+                $query->where('status',1);
+            });
+            if(!empty($search)){
+                $models->where(function($query) use ($search){
+                    $query->where('name','LIKE',"%{$search}%")
+                        ->orWhere('email', 'LIKE',"%{$search}%");
+                });
+
+                $totalFiltered = User::where(function($query) use ($search){
+                    $query->where('name','LIKE',"%{$search}%")
+                        ->orWhere('email', 'LIKE',"%{$search}%");
+                    })
+                    ->where(function($query){
+                        $query->where('status',1);
+                    })
+                    ->count();
+            }
+
+            $models = $models->offset($start)
+                    ->limit($limit)
+                    ->orderBy($order,$dir)
+                    ->get();
+
+            $data = $models->toArray();
+
+            if(!empty($data)){
+                for($i = 0; $i < count($data); $i++){
+                    $data[$i]['action'] = '
+                    <a href="'.route('user.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
+                        <i class="fa fa-pencil color-muted m-r-5"></i> 
+                    </a>
+                    <a href="'.route('user.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
+                        <i class="fa fa-close color-danger"></i>
+                    </a>
+                    ';
+                }
+            }
+            $json_data = array(
+                "draw"            => intval($request->input('draw')),
+                "recordsTotal"    => intval($totalData),
+                "recordsFiltered" => intval($totalFiltered),
+                "data"            => $data
+            );
+
+            return json_encode($json_data);
+        }
+    }
+
     public function add() {
         $param = array();
         $param['_title'] = 'Deluna | Add User';
@@ -63,6 +132,7 @@ class UserController extends Controller {
         $user->email = $request->email;
         $user->password = md5($request->password);
         $user->created_by = Session::get('user')->id;
+        $user->status = 1;
         if($user->save()){
             Session::flash('message.success', 'Account has been created!');
             return redirect()->route('user.index');
@@ -137,8 +207,8 @@ class UserController extends Controller {
             Session::flash('message.error', 'Account doesn\'t exists!');
             return redirect()->back();
         }
-        User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
-        if($user->delete()){
+        $delete = User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id, 'status' => 0]);
+        if($delete){
             Session::flash('message.success', 'Account has been deleted!');
             return redirect()->route('user.index');
         } else {

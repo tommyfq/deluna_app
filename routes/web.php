@@ -26,6 +26,7 @@ Route::middleware('check.user')->group(function(){
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::prefix('user')->group(function(){
         Route::get('/', [UserController::class, 'index'])->name('user.index');
+        Route::get('/list', [UserController::class, 'getUser'])->name('user.list');
         Route::get('add', [UserController::class, 'add'])->name('user.add');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
         Route::get('/edit/{slug}', [UserController::class, 'edit'])->name('user.edit');
