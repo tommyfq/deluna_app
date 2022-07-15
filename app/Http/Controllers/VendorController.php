@@ -24,7 +24,7 @@ class VendorController extends Controller {
         return view('layouts.master', $param);
     }
 
-    public function getVendors(Request $request)
+    public function get(Request $request)
     {
         //dd($request);
         if ($request->ajax()) {

@@ -24,7 +24,7 @@ class UserController extends Controller {
         return view('layouts.master', $param);
     }
 
-    public function getUser(Request $request)
+    public function get(Request $request)
     {
         if ($request->ajax()) {
             $columns = array(

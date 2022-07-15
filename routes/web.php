@@ -26,7 +26,7 @@ Route::middleware('check.user')->group(function(){
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::prefix('user')->group(function(){
         Route::get('/', [UserController::class, 'index'])->name('user.index');
-        Route::get('/list', [UserController::class, 'getUser'])->name('user.list');
+        Route::get('/list', [UserController::class, 'get'])->name('user.list');
         Route::get('add', [UserController::class, 'add'])->name('user.add');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
         Route::get('/edit/{slug}', [UserController::class, 'edit'])->name('user.edit');
@@ -35,7 +35,7 @@ Route::middleware('check.user')->group(function(){
     });
     Route::prefix('vendor')->group(function(){
         Route::get('/', [VendorController::class, 'index'])->name('vendor.index');
-        Route::get('/list', [VendorController::class, 'getVendors'])->name('vendor.list');
+        Route::get('/list', [VendorController::class, 'get'])->name('vendor.list');
         Route::get('add', [VendorController::class, 'add'])->name('vendor.add');
         Route::post('/', [VendorController::class, 'store'])->name('vendor.store');
     });
