@@ -9,11 +9,11 @@
                     @include('_includes.alert')
                     <div class="row">
                         <div class="col">
-                            <h4 class="card-title">Category Menu</h4>
-                            <p class="text-muted m-b-15 f-s-12">You can see the list of categories, add, edit and delete Category.</p>
+                            <h4 class="card-title">{{ucwords($_page)}} Menu</h4>
+                            <p class="text-muted m-b-15 f-s-12">You can see the list of categories, add, edit and delete {{ucwords($_page)}}.</p>
                         </div>
                         <div class="col">
-                            <a href="{{route('category.add')}}" class="btn mb-1 btn-primary float-right">Add Category</a>
+                            <a href="{{route($_page.'.add')}}" class="btn mb-1 btn-primary float-right">Add {{ucwords($_page)}}</a>
                         </div>
                     </div>
                     <div class="row">
@@ -48,7 +48,7 @@
         var table = $('.yajra-datatable').DataTable({
           processing: true,
           serverSide: true,
-          ajax: "{{ route('category.list') }}",
+          ajax: "{{ route($_page.'.list') }}",
           columns: [
               {data: 'name', name: 'name'},
               {data: 'type', name: 'type'},
