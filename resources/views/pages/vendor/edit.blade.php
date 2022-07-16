@@ -48,17 +48,10 @@
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="is_active">Active</label>
                                 <div class="col-lg-6">
-                                    @if(old('is_active'))
-                                        <label class="radio-inline mr-3">
-                                            <input type="radio" name="is_active" value="true" {{old('is_active') =='true' ? 'checked' : ''}}>Active</label>
-                                        <label class="radio-inline mr-3">
-                                            <input type="radio" name="is_active" value="false" {{old('is_active') =='false' ? 'checked' : ''}}>Inactive</label>
-                                    @else
-                                        <label class="radio-inline mr-3">
-                                            <input type="radio" name="is_active" value="true" {{$data->is_active =='true' ? 'checked' : ''}}>Active</label>
-                                        <label class="radio-inline mr-3">
-                                            <input type="radio" name="is_active" value="false" {{$data->is_active =='false' ? 'checked' : ''}}>Inactive</label>
-                                    @endif
+                                    <label class="radio-inline mr-3">
+                                        <input type="radio" name="is_active" value="true" {{ old('is_active') ? (old('is_active') == 'true' ? 'checked' : '') : ($data->is_active ? 'checked' : '' ) }}>Active</label>
+                                    <label class="radio-inline mr-3">
+                                        <input type="radio" name="is_active" value="false" {{ old('is_active') ? (old('is_active') == 'false' ? 'checked' : '') : (!$data->is_active ? 'checked' : '' ) }}>Inactive</label>
                                 </div>
                             </div>
                             <div class="form-group row">

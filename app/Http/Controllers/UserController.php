@@ -9,16 +9,17 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 
 class UserController extends Controller {
-
+    
+    private $page = 'user';
     public function __construct(){
 	}
 
     public function index(Request $request) {
         $param = array();
-        $param['_title'] = 'Deluna | Users Menu';
-        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'User' => route('user.index')];
+        $param['_title'] = 'Deluna | '.ucwords($this->page).' Menu';
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         
-        $viewtarget = "pages.user.index";
+        $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
         $param['CONTENT'] = $content;
         return view('layouts.master', $param);
@@ -44,9 +45,7 @@ class UserController extends Controller {
             $dir = $request->input('order.0.dir');
             $search = $request->input('search.value');
 
-            $models =  User::where(function($query){
-                $query->where('is_active',1);
-            });
+            $models =  User::where(function($query){});
             if(!empty($search)){
                 $models->where(function($query) use ($search){
                     $query->where('name','LIKE',"%{$search}%")
@@ -56,9 +55,6 @@ class UserController extends Controller {
                 $totalFiltered = User::where(function($query) use ($search){
                     $query->where('name','LIKE',"%{$search}%")
                         ->orWhere('email', 'LIKE',"%{$search}%");
-                    })
-                    ->where(function($query){
-                        $query->where('is_active',1);
                     })
                     ->count();
             }
@@ -72,6 +68,10 @@ class UserController extends Controller {
 
             if(!empty($data)){
                 for($i = 0; $i < count($data); $i++){
+                    $data[$i]['is_active'] = $data[$i]['is_active'] == 1 ? 
+                    '<i class="fa fa-check text-success">'
+                    :
+                    '<i class="fa fa-close text-danger">';
                     $data[$i]['action'] = '
                     <a href="'.route('user.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="fa fa-pencil color-muted m-r-5"></i> 
@@ -95,8 +95,8 @@ class UserController extends Controller {
 
     public function add() {
         $param = array();
-        $param['_title'] = 'Deluna | Add User';
-        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'User' => route('user.index'), 'Add' => route('user.add')];
+        $param['_title'] = 'Deluna | Add '.ucwords($this->page);
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         
         $viewtarget = "pages.user.add";
         $content = view($viewtarget, $param);
@@ -110,7 +110,8 @@ class UserController extends Controller {
             'name' => 'required',
             'email' => 'required',
             'password' => 'required',
-            'confirm_password' => 'required|same:password'
+            'confirm_password' => 'required|same:password',
+            'is_active' => 'required'
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
@@ -118,7 +119,7 @@ class UserController extends Controller {
         ];
         $validator = Validator::make($request->all(), $rules, $custom);
         if($validator->fails()){
-            return redirect()->back()->withErrors($validator);
+            return redirect()->back()->withInput()->withErrors($validator);
         }
         // check if user exist
         $check = User::where('email',$request->email)->first();
@@ -132,7 +133,7 @@ class UserController extends Controller {
         $user->email = $request->email;
         $user->password = md5($request->password);
         $user->created_by = Session::get('user')->id;
-        $user->is_active = 1;
+        $user->is_active = $request->is_active === 'true' ? true: false;
         if($user->save()){
             Session::flash('message.success', 'Account has been created!');
             return redirect()->route('user.index');
@@ -144,10 +145,10 @@ class UserController extends Controller {
 
     public function edit($slug) {
         $param = array();
-        $param['_title'] = 'Deluna | Edit User';
-        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), 'User' => route('user.index'), 'Edit' => route('user.edit',[$slug])];
+        $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
+        $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
 
-        $user = User::where(['id' => $slug, 'is_active' => 1])->first();
+        $user = User::where(['id' => $slug])->first();
         if(!$user){
             Session::flash('message.error', "Data not found!");
             return redirect()->route('user.index');
@@ -164,13 +165,14 @@ class UserController extends Controller {
         $rules = [
             'name' => 'required',
             'email' => 'required',
+            'is_active' => 'required',
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
         ];
         $validator = Validator::make($request->all(), $rules, $custom);
         if($validator->fails()){
-            return redirect()->back()->withErrors($validator);
+            return redirect()->back()->withInput()->withErrors($validator);
         }
         // check if user exist
         $user = User::find($slug);
@@ -182,6 +184,7 @@ class UserController extends Controller {
         $array = [
             'name' => $request->name,
             'email' => $request->email,
+            'is_active' => $request->is_active === 'true' ? true: false,
             'updated_by' => Session::get('user')->id,
         ];
         if($request->password)
@@ -204,12 +207,12 @@ class UserController extends Controller {
         // check if user exist
         $user = User::find($slug);
         if(!$user){
-            Session::flash('message.error', 'Account doesn\'t exists!');
+            Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
         User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
         if($user->delete()){
-            Session::flash('message.success', 'Account has been deleted!');
+            Session::flash('message.success', ucwords($this->page).' has been deleted!');
             return redirect()->route('user.index');
         } else {
             Session::flash('message.error', 'Sorry there is an error while delete the data!');

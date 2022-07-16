@@ -11,28 +11,37 @@
                                 <label class="col-lg-4 col-form-label" for="username">Name <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="username" name="name" placeholder="Enter your username">
+                                    <input type="text" class="form-control" id="username" name="name" value="{{old('name')}}" placeholder="Enter your username">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="email">Email <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your Email">
+                                    <input type="email" class="form-control" id="email" name="email" value="{{old('email')}}" placeholder="Enter your Email">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="password">Password <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
+                                    <input type="password" class="form-control" id="password" name="password" value="{{old('password')}}" placeholder="Enter your password">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="confirm-password">Confirm Password <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Enter your confirm paswword">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" value="{{old('confirm_password')}}" placeholder="Enter your confirm paswword">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="is_active">Active <span class="text-danger">*</span></label>
+                                <div class="col-lg-6">
+                                    <label class="radio-inline mr-3">
+                                        <input type="radio" name="is_active" value="true" checked>Active</label>
+                                    <label class="radio-inline mr-3">
+                                        <input type="radio" name="is_active" value="false">Inactive</label>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -68,12 +77,14 @@
                 "email": { required: !0, email: !0 },
                 "password": { required: !0, minlength: 6 },
                 "confirm_password": { required: !0, equalTo: "#password" },
+                "is_active": { required: !0 }
             },
             messages: {
                 "name": { required: "Please enter a name", minlength: "Your name must consist of at least 3 characters" },
                 "email": "Please enter a valid email address",
                 "password": { required: "Please provide a password", minlength: "Your password must be at least 6 characters long" },
                 "confirm_password": { required: "Please provide a password", minlength: "Your password must be at least 6 characters long", equalTo: "Please enter the same password as above" },
+                "is_active": "Please choose the active status",
             },
         });
     </script>
