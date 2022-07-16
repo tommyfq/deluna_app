@@ -68,7 +68,7 @@ class UserController extends Controller {
 
             if(!empty($data)){
                 for($i = 0; $i < count($data); $i++){
-                    $data[$i]['is_active'] = $data[$i]['is_active'] == 1 ? 
+                    $data[$i]['is_active'] = $data[$i]['is_active'] == true ? 
                     '<i class="fa fa-check text-success">'
                     :
                     '<i class="fa fa-close text-danger">';
@@ -98,7 +98,7 @@ class UserController extends Controller {
         $param['_title'] = 'Deluna | Add '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         
-        $viewtarget = "pages.user.add";
+        $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
         $param['CONTENT'] = $content;
         return view('layouts.master', $param);
@@ -154,7 +154,7 @@ class UserController extends Controller {
             return redirect()->route('user.index');
         }
         $param['data'] = $user;
-        $viewtarget = "pages.user.edit";
+        $viewtarget = "pages.".$this->page.".edit";
         $content = view($viewtarget, $param);
         $param['CONTENT'] = $content;
         return view('layouts.master', $param);
