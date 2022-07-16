@@ -70,11 +70,13 @@
                 "name": { required: !0, minlength: 3 },
                 "email": { required: !0, email: !0 },
                 "password": { minlength: 6 },
+                "is_active": { required: !0 },
             },
             messages: {
                 "name": { required: "Please enter a name", minlength: "Your name must consist of at least 3 characters" },
                 "email": "Please enter a valid email address",
                 "password": { minlength: "Your password must be at least 6 characters long" },
+                "is_active": "Please choose the active status",
             },
         });
     </script>
