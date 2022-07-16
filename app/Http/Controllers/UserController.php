@@ -18,6 +18,7 @@ class UserController extends Controller {
         $param = array();
         $param['_title'] = 'Deluna | '.ucwords($this->page).' Menu';
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
+        $param['_page'] = $this->page;
         
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -73,10 +74,10 @@ class UserController extends Controller {
                     :
                     '<i class="fa fa-close text-danger">';
                     $data[$i]['action'] = '
-                    <a href="'.route('user.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
+                    <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="fa fa-pencil color-muted m-r-5"></i> 
                     </a>
-                    <a href="'.route('user.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
+                    <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
                         <i class="fa fa-close color-danger"></i>
                     </a>
                     ';
@@ -97,6 +98,7 @@ class UserController extends Controller {
         $param = array();
         $param['_title'] = 'Deluna | Add '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
+        $param['_page'] = $this->page;
         
         $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
@@ -122,9 +124,9 @@ class UserController extends Controller {
             return redirect()->back()->withInput()->withErrors($validator);
         }
         // check if user exist
-        $check = User::where('email',$request->email)->first();
+        $check = User::where(['email' => $request->email, 'deleted_at' => NULL])->first();
         if($check){
-            Session::flash('message.error', 'Account already exists!');
+            Session::flash('message.error', ucwords($this->page).' already exists!');
             return redirect()->back();
         }
         // create new user
@@ -135,8 +137,8 @@ class UserController extends Controller {
         $user->created_by = Session::get('user')->id;
         $user->is_active = $request->is_active === 'true' ? true: false;
         if($user->save()){
-            Session::flash('message.success', 'Account has been created!');
-            return redirect()->route('user.index');
+            Session::flash('message.success', ucwords($this->page).' has been created!');
+            return redirect()->route($this->page.'.index');
         } else {
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back();
@@ -147,11 +149,12 @@ class UserController extends Controller {
         $param = array();
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
+        $param['_page'] = $this->page;
 
-        $user = User::where(['id' => $slug])->first();
+        $user = User::where(['id' => $slug, 'deleted_at' => NULL])->first();
         if(!$user){
             Session::flash('message.error', "Data not found!");
-            return redirect()->route('user.index');
+            return redirect()->route($this->page.'.index');
         }
         $param['data'] = $user;
         $viewtarget = "pages.".$this->page.".edit";
@@ -177,7 +180,7 @@ class UserController extends Controller {
         // check if user exist
         $user = User::find($slug);
         if(!$user){
-            Session::flash('message.error', 'Account doesn\'t exists!');
+            Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
         // update user
@@ -191,8 +194,8 @@ class UserController extends Controller {
            $array['password'] = md5($request->password);
         $user = User::where('id', $slug)->update($array);
         if($user){
-            Session::flash('message.success', 'Account has been updated!');
-            return redirect()->route('user.index');
+            Session::flash('message.success', ucwords($this->page).' has been updated!');
+            return redirect()->route($this->page.'.index');
         } else {
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back();
@@ -213,7 +216,7 @@ class UserController extends Controller {
         User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
         if($user->delete()){
             Session::flash('message.success', ucwords($this->page).' has been deleted!');
-            return redirect()->route('user.index');
+            return redirect()->route($this->page.'.index');
         } else {
             Session::flash('message.error', 'Sorry there is an error while delete the data!');
             return redirect()->back();

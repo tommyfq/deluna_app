@@ -112,6 +112,7 @@ class CategoryController extends Controller {
         $rules = [
             'name' => 'required',
             // 'type' => 'required',
+            'is_active' => 'required',
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
@@ -146,7 +147,7 @@ class CategoryController extends Controller {
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
 
-        $category = Category::where(['id' => $slug])->first();
+        $category = Category::where(['id' => $slug, 'deleted_at' => NULL])->first();
         if(!$category){
             Session::flash('message.error', "Data not found!");
             return redirect()->route($this->page.'.index');
@@ -165,6 +166,7 @@ class CategoryController extends Controller {
         $rules = [
             'name' => 'required',
             // 'type' => 'required',
+            'is_active' => 'required',
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
