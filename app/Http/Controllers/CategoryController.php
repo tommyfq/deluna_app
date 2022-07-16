@@ -74,10 +74,10 @@ class CategoryController extends Controller {
                     :
                     '<i class="fa fa-close text-danger">';
                     $data[$i]['action'] = '
-                    <a href="'.route('category.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
+                    <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="fa fa-pencil color-muted m-r-5"></i> 
                     </a>
-                    <a href="'.route('category.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
+                    <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
                         <i class="fa fa-close color-danger"></i>
                     </a>
                     ';
