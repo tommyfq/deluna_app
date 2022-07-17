@@ -78,15 +78,14 @@ class OptionController extends Controller {
                     :
                     '<i class="fa fa-close text-danger">';
                     
-                    /*$data[$i]['action'] = '
-                    <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
-                        <i class="fa fa-pencil color-muted m-r-5"></i> 
-                    </a>
-                    <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-name="'.$data[$i]['name'].'" class="btn-delete" data-toggle="tooltip" data-placement="top" title="Close">
-                        <i class="fa fa-close color-danger"></i>
-                    </a>
-                    ';*/
-                    $data[$i]['action'] = '';
+                    $data[$i]['action'] = '
+                        <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
+                            <i class="fa fa-pencil color-muted m-r-5"></i> 
+                        </a>
+                        <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-name="'.$data[$i]['name'].'" class="btn-delete" data-toggle="tooltip" data-placement="top" title="Close">
+                            <i class="fa fa-close color-danger"></i>
+                        </a>
+                    ';
                 }
             }
 
@@ -163,17 +162,16 @@ class OptionController extends Controller {
     public function edit($slug)
     {
         $param = array();
-        $param['_title'] = 'Deluna | Edit User';
+        $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
         $param['_page'] = $this->page;
 
-        $selected = Vendor::where('id', $slug)->first();
+        $selected = OptionType::where('id', $slug)->with(['option'])->first();
         if(!$selected){
             Session::flash('message.error', "Data not found!");
             return redirect()->route($this->page.'.index');
         }
         $selected->is_active = $selected->is_active == 1 ? 'true' : 'false';
-        $selected->phone = str_replace('+62','',$selected->phone);
         $param['data'] = $selected;
         $viewtarget = "pages.".$this->page.".edit";
         $content = view($viewtarget, $param);
@@ -240,6 +238,59 @@ class OptionController extends Controller {
             Session::flash('message.error', 'Sorry there is an error while delete the data!');
             return redirect()->back();
         }
+    }
+
+    public function update_option(Request $request, $slug)
+    {
+        $response = array(
+            "is_ok" => false,
+            "message" => "Request is not ajax"
+        );
+
+        if($request->ajax()){
+            $now = Carbon::now()->format('Y-m-d H:i:s');
+            $check = Option::
+                where('name',$request->name)
+                ->where('id','!=',$slug)
+                ->where('option_type_id',$request->option_type_id)
+                ->first();
+
+            if(!$check){
+                $response = array(
+                    "is_ok" => false,
+                    "message" => "Already exist"
+                );
+            }
+
+            try{
+                $update = Option::where('id',$slug)->update(
+                    [
+                        'name'=>$request->name,
+                        'updated_by'=>Session::get('user')->id,
+                        'updated_at'=>$now
+                    ]
+                );
+                if($update){
+                    $response = array(
+                        "is_ok" => true,
+                        "message" => "Successfully saved"
+                    );
+                }else{
+                    $response = array(
+                        "is_ok" => false,
+                        "message" => "Failed"
+                    );
+                }
+            }catch(Exception $e){
+                $response = array(
+                    "is_ok" => false,
+                    "message" => "Failed"
+                );
+            }
+            
+        }
+
+        return json_encode($response);
     }
 
 }

@@ -58,5 +58,9 @@ Route::middleware('check.user')->group(function(){
         Route::get('/list', [OptionController::class, 'get'])->name('option.list');
         Route::get('add', [OptionController::class, 'add'])->name('option.add');
         Route::post('/', [OptionController::class, 'store'])->name('option.store');
+        Route::get('/edit/{slug}', [OptionController::class, 'edit'])->name('option.edit');
+        Route::put('/{slug}', [OptionController::class, 'update'])->name('option.update');
+        Route::get('/delete/{slug}', [OptionController::class, 'delete'])->name('option.delete');
+        Route::put('/update-option/{slug}', [OptionController::class, 'update_option'])->name('option.update-option');
     });
 });
