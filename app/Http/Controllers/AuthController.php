@@ -46,11 +46,11 @@ class AuthController extends Controller {
         // check user
         $check = User::where('email', $request->email)->first();
         if(!$check){
-            if($check->password != md5($password)){
-                Session::flash('message.error', "Wrong username or password");
-                return redirect()->back();
-            }
             Session::flash('message.error', "Account doesn't exists!");
+            return redirect()->back();
+        }
+        if($check->password != md5($request->password)){
+            Session::flash('message.error', "Wrong username or password");
             return redirect()->back();
         }
         Session::put('user', $check);

@@ -5,7 +5,7 @@
                 <div class="card-body">
                     @include('_includes.alert')
                     <div class="form-validation">
-                        <form class="form-valide" action="{{route('category.store')}}" method="post">
+                        <form class="form-valide" action="{{route($_page.'.store')}}" method="post">
                             @csrf
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="name">Name <span class="text-danger">*</span>
@@ -22,6 +22,15 @@
                                             <option>{{$val}}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="is_active">Active <span class="text-danger">*</span></label>
+                                <div class="col-lg-6">
+                                    <label class="radio-inline mr-3">
+                                        <input type="radio" name="is_active" value="true" checked>Active</label>
+                                    <label class="radio-inline mr-3">
+                                        <input type="radio" name="is_active" value="false">Inactive</label>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -54,9 +63,11 @@
             },
             rules: {
                 "name": { required: !0 },
+                "is_active": { required: !0 },
             },
             messages: {
                 "name": { required: "Please enter a name" },
+                "is_active": "Please choose the active status",
             },
         });
     </script>

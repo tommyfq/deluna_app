@@ -75,7 +75,7 @@ class VendorController extends Controller {
 
             if(!empty($data)){
                 for($i = 0; $i < count($data); $i++){
-                    $data[$i]['is_active'] = $data[$i]['is_active'] == 1 ? 
+                    $data[$i]['is_active'] = $data[$i]['is_active'] == true ? 
                     '<i class="fa fa-check text-success">'
                     :
                     '<i class="fa fa-close text-danger">';
