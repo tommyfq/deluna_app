@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OptionController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -51,5 +52,11 @@ Route::middleware('check.user')->group(function(){
         Route::get('/edit/{slug}', [CategoryController::class, 'edit'])->name('category.edit');
         Route::put('/{slug}', [CategoryController::class, 'update'])->name('category.update');
         Route::get('/delete/{slug}', [CategoryController::class, 'delete'])->name('category.delete');
+    });
+    Route::prefix('option')->group(function(){
+        Route::get('/', [OptionController::class, 'index'])->name('option.index');
+        Route::get('/list', [OptionController::class, 'get'])->name('option.list');
+        Route::get('add', [OptionController::class, 'add'])->name('option.add');
+        Route::post('/', [OptionController::class, 'store'])->name('option.store');
     });
 });

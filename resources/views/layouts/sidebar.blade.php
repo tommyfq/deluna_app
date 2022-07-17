@@ -22,6 +22,9 @@
                 <ul aria-expanded="false">
                     <li><a href="{{route('category.index')}}">Category</a></li>
                 </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{route('option.index')}}">Option</a></li>
+                </ul>
             </li>
         </ul>
     </div>
