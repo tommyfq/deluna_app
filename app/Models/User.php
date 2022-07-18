@@ -19,6 +19,7 @@ class User extends Model
         'username',
         'email',
         'password',
+        'is_active',
         'created_by',
         'updated_by',
         'deleted_by',

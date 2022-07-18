@@ -213,7 +213,7 @@ class UserController extends Controller {
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
-        User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+        User::where('id',$slug)->update(['deleted_by' => Session::get('user')->id, 'is_active' => 0]);
         if($user->delete()){
             Session::flash('message.success', ucwords($this->page).' has been deleted!');
             return redirect()->route($this->page.'.index');

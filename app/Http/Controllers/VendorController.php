@@ -228,7 +228,7 @@ class VendorController extends Controller {
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
-        Vendor::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+        Vendor::where('id',$slug)->update(['deleted_by' => Session::get('user')->id, 'is_active' => 0]);
         if($data->delete()){
             Session::flash('message.success', ucwords($this->page).' has been deleted!');
             return redirect()->route($this->page.'.index');

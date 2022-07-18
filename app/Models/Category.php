@@ -18,6 +18,7 @@ class Category extends Model
         'name',
         'type',
         'parent_id',
+        'is_active',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -29,4 +30,8 @@ class Category extends Model
         'category',
         'subcategory'
     ];
+
+    public function products(){
+        return $this->hasMany(Product::class);
+    }
 }
