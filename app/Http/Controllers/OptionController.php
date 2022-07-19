@@ -181,40 +181,57 @@ class OptionController extends Controller {
     
     public function update(Request $request, $slug)
     {
-        // validation
-        $rules = [
-            'name' => 'required',
-            'slug' => 'required',
-            'address' => 'required',
-            'phone' => 'required | regex:/^([0-9\s\-\+\(\)]*)$/ | min:10'
-        ];
-        $custom = [
-            'required' => 'The :attribute field is required.',
-        ];
-        $validator = Validator::make($request->all(), $rules, $custom);
-        if($validator->fails()){
-            return redirect()->back()->withErrors($validator);
-        }
-        // check if user exist
-        $user = Vendor::find($slug);
-        if(!$user){
-            Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
-            return redirect()->back();
-        }
-        // update user
+        $response = array(
+            "is_ok" => false,
+            "message" => "Request is not ajax"
+        );
+
+        $now = Carbon::now()->format('Y-m-d H:i:s');
+        
         $param = $request->all();
-        $param['phone'] = '+62'.$param['phone'];
-        unset($param['_token']);
-        unset($param['_method']);
-        $param['is_active'] = $param['is_active'] === 'true' ? true: false;
-        $param['updated_by'] = Session::get('user')->id;
-        $result = Vendor::where('id', $slug)->update($param);
-        if($result){
-            Session::flash('message.success', ucwords($this->page).' has been updated!');
-            return redirect()->route($this->page.'.index');
-        } else {
-            Session::flash('message.error', 'Sorry there is an error while saving the data!');
-            return redirect()->back();
+        $options = [];
+        if(array_key_exists('options',$param)) $options = $param['options'];
+        $user_id = Session::get('user')->id;
+
+        if($request->ajax()){
+
+            $option_type = OptionType::find($slug);
+            if(!$option_type){
+                return json_encode(array(
+                    "is_ok" => false,
+                    "message" => 'Option Type '.$param['name'].' doesn\'t exists!'
+                ));
+            }
+
+            unset($param['_token']);
+            unset($param['_method']);
+            unset($param['options']);
+            
+            $param['is_active'] = $param['is_active'] === 'true' ? true: false;
+            $param['updated_by'] = Session::get('user')->id;
+
+            // update option type
+            $result = OptionType::where('id', $slug)->update($param);
+            
+            if($result){
+                foreach($options as $opt){
+                    $data = array();
+                    $data['option_type_id'] = $slug;
+                    $data['name'] = $opt;
+                    $data['created_by'] = $user_id;
+                    $data['created_at'] = $now;
+                    Option::insert($data);
+                }
+                return json_encode(array(
+                    "is_ok" => true,
+                    "message" => 'Option Type '.$param['name'].' has been updated!'
+                ));
+            } else {
+                return json_encode(array(
+                    "is_ok" => false,
+                    "message" => 'Sorry there is an error while saving the data!'.$param['name']
+                ));
+            }
         }
     }
 
@@ -288,6 +305,46 @@ class OptionController extends Controller {
                 );
             }
             
+        }
+
+        return json_encode($response);
+    }
+
+    public function delete_option(Request $request, $slug)
+    {
+        $response = array(
+            "is_ok" => false,
+            "message" => "Request is not ajax"
+        );
+
+        if($request->ajax()){
+            $data = Option::find($slug);
+            if(!$data){
+                return json_encode(array(
+                    "is_ok" => false,
+                    'message' => 'Option '.$request->name.' not find'
+                ));
+            }
+            try{
+                Option::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+                if($data->delete()){
+                    return json_encode(array(
+                        "is_ok" => true,
+                        "option_id" => $data->id,
+                        'message' => 'Successfully Delete '.$request->name
+                    ));
+                }else{
+                    return json_encode(array(
+                        "is_ok" => false,
+                        'message' => 'Sorry there is an error while delete the data '.$request->name.' !'
+                    ));
+                }
+            }catch(Exception $e){
+                return json_encode(array(
+                    "is_ok" => false,
+                    'message' => $e->getMessage()
+                ));
+            }
         }
 
         return json_encode($response);

@@ -63,6 +63,7 @@ Route::middleware('check.user')->group(function(){
         Route::put('/{slug}', [OptionController::class, 'update'])->name('option.update');
         Route::get('/delete/{slug}', [OptionController::class, 'delete'])->name('option.delete');
         Route::put('/update-option/{slug}', [OptionController::class, 'update_option'])->name('option.update-option');
+        Route::delete('/delete-option/{slug}',[OptionController::class, 'delete_option'])->name('option.delete-option');
     });
     Route::prefix('product')->group(function(){
         Route::get('/', [ProductController::class, 'index'])->name('product.index');
