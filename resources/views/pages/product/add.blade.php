@@ -102,7 +102,7 @@
     <script>
         $(document).ready(function(){
             var opt_list = [];
-            $(document).find("select[id^='type_']").on('change', function(){
+            $(document).find("select[id^='type_']").on('change', async function(){
                 let value = $('#'+this.id).find(":selected").val();
                 let num = this.id.split('_')[1];
                 let txt = $('#'+this.id).find(":selected").text();
@@ -111,8 +111,9 @@
                     return false;
                 }
                 $('#lbl_type_'+num).text(txt);
+                console.log(num);
                 // get data
-                get_data(value, num);
+                await get_data(value, num);
                 let lbl1 = $('#lbl_type_0').text();
                 let lbl2 = $('#lbl_type_1').text();
                 if(lbl1 && lbl2){
@@ -139,9 +140,9 @@
                 }
             });
 
-            function get_data(id, idx){
+            async function get_data(id, idx){
                 let url = "{{route('product.getoptions')}}";
-                $.ajax({
+                await $.ajax({
                     url: url,
                     type: 'post',
                     data: {
@@ -156,7 +157,9 @@
                             $.each(result.data, function(idx, val){
                                 html += '<option value="'+val.id+'">'+val.name+'</option>';
                             });
-                            opt_list[idx] = html;
+                            opt_list.push({idx:html});
+                            //opt_list[idx] = html;
+                            console.log(opt_list);
                         } else {
                             delete opt_list[idx]
                             toastr.error(
