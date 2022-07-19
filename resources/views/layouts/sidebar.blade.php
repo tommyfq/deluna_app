@@ -25,6 +25,9 @@
                 <ul aria-expanded="false">
                     <li><a href="{{route('option.index')}}">Option</a></li>
                 </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{route('product.index')}}">Product</a></li>
+                </ul>
             </li>
         </ul>
     </div>

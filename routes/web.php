@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OptionController;
+use App\Http\Controllers\ProductController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -62,5 +63,15 @@ Route::middleware('check.user')->group(function(){
         Route::put('/{slug}', [OptionController::class, 'update'])->name('option.update');
         Route::get('/delete/{slug}', [OptionController::class, 'delete'])->name('option.delete');
         Route::put('/update-option/{slug}', [OptionController::class, 'update_option'])->name('option.update-option');
+    });
+    Route::prefix('product')->group(function(){
+        Route::get('/', [ProductController::class, 'index'])->name('product.index');
+        Route::get('/list', [ProductController::class, 'get'])->name('product.list');
+        Route::get('add', [ProductController::class, 'add'])->name('product.add');
+        Route::post('/', [ProductController::class, 'store'])->name('product.store');
+        Route::get('/edit/{slug}', [ProductController::class, 'edit'])->name('product.edit');
+        Route::put('/{slug}', [ProductController::class, 'update'])->name('product.update');
+        Route::get('/delete/{slug}', [ProductController::class, 'delete'])->name('product.delete');
+        Route::post('get-options', [ProductController::class, 'get_options'])->name('product.getoptions');
     });
 });
