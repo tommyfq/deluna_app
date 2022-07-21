@@ -191,6 +191,8 @@ class OptionController extends Controller {
         $param = $request->all();
         $options = [];
         if(array_key_exists('options',$param)) $options = $param['options'];
+        $opt_id = $request->opt_id;
+        $opt_name = $request->opt_name;
         $user_id = Session::get('user')->id;
 
         if($request->ajax()){
@@ -206,6 +208,8 @@ class OptionController extends Controller {
             unset($param['_token']);
             unset($param['_method']);
             unset($param['options']);
+            unset($param['opt_id']);
+            unset($param['opt_name']);
             
             $param['is_active'] = $param['is_active'] === 'true' ? true: false;
             $param['updated_by'] = Session::get('user')->id;
@@ -214,7 +218,27 @@ class OptionController extends Controller {
             $result = OptionType::where('id', $slug)->update($param);
             
             if($result){
+                //Update existing 
+                for($i = 0; $i < count($opt_id);$i++){
+                    $exist_opt = Option::where('name',$opt_name[$i])->where('id','!=',$opt_id[$i])->first();
+                    if($exist_opt){
+                        return json_encode(array(
+                            "is_ok" => false,
+                            "message" => 'Option '.$opt_name[$i].' already exist'
+                        ));
+                    }
+                    Option::where('id',(int)$opt_id[$i])->update(['name'=>$opt_name[$i]]);
+                }
+
+                //Add new data
                 foreach($options as $opt){
+                    $exist_opt = Option::where('name',$opt)->where('option_type_id',$slug)->first();
+                    if($exist_opt){
+                        return json_encode(array(
+                            "is_ok" => false,
+                            "message" => 'Option '.$opt.' already exist'
+                        ));
+                    }
                     $data = array();
                     $data['option_type_id'] = $slug;
                     $data['name'] = $opt;
@@ -242,12 +266,12 @@ class OptionController extends Controller {
             return redirect()->back();
         }
         // check if user exist
-        $data = Vendor::find($slug);
+        $data = OptionType::find($slug);
         if(!$data){
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
-        Vendor::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+        OptionType::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
         if($data->delete()){
             Session::flash('message.success', ucwords($this->page).' has been deleted!');
             return redirect()->route($this->page.'.index');

@@ -17,6 +17,9 @@
                             @csrf
                             <div class="form-group row">
                                 <div class="col-lg-12 ml-auto text-right">
+                                    <a id="btn-delete-opt" href="{{route($_page.'.delete',[$data->id])}}">
+                                        <button type="button" class="btn btn-danger">Delete</button>
+                                    </a>
                                     <button id="btn-save" type="submit" class="btn btn-primary">Submit</button>
                                 </div>
                             </div>
@@ -41,9 +44,8 @@
                                 @foreach($data->option as $opt)
                                 <div id="row_option_{{$opt->id}}" class="form-group row option-row">
                                     <div class="col-lg-6">
-                                        <input type="hidden" class="option-id" value="{{$opt->id}}" /> 
-                                        <input type="hidden" class="option-type-id" value="{{$opt->option_type_id}}" /> 
-                                        <input type="text" class="form-control option-name" placeholder="Enter options" value="{{$opt->name}}" required />
+                                        <input type="hidden" class="option-id" name="opt_id[]" value="{{$opt->id}}" /> 
+                                        <input type="text" class="form-control option-name" placeholder="Enter options" name="opt_name[]" value="{{$opt->name}}" required />
                                     </div>
                                     <div class="col-lg-2 btn-container">
                                         <button type="button" class="btn btn-info btn-edit"><i class="fa fa-pencil"></i></button>
@@ -89,7 +91,6 @@
     <script src="{{asset('plugins/sweetalert2/dist/sweetalert2.min.js')}}"></script>
     <script>
         $(document).ready(function(){
-            
             $('#btn-add').on('click',function(){
                 $('.option-container').append(`
                     <div class="form-group row option-list">
@@ -125,43 +126,44 @@
             })
 
             $(document).on('click','.btn-delete-option',function(){
-                $('#basicModal').modal('show');
+                
                 var id = $(this).closest('.option-row').find('.option-id').val();
                 var name = $(this).closest('.option-row').find('.option-name').val();
-                $('#modal-title').text('Are you sure want to delete '+name+' ?');
-                $('#modal-delete').data('id',id);
-                $('#modal-delete').data('name',name);
-            });
 
-            $(document).on('click','#modal-delete',function(){
-                var id = $(this).data('id');
-                var name = $(this).data('name');
-                var url = "{{URL::to('/')}}/option/delete-option/"+id;
-                $.ajax({
-                    url : url,
-                    type: "DELETE",
-                    data:{
-                        _token: "{{ csrf_token() }}",
-                        name: name
-                    },
-                    success: function(data, textStatus, jqXHR)
-                    {
-                        var result = JSON.parse(data);
-                        if(result.is_ok){
-                            $('#row_option_'+result.option_id).remove();
-                            toastr.success(result.message);
-                        }else{
-                            toastr.error(result.message);
-                        }
-                        $('#basicModal').modal('hide');
-                        //data - response from server
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                
+                Swal.fire({
+                    title: 'Do you delete this option '+name+' ?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete',
+                    }).then((result) => {
+                        console.log(result);
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.value) {
+                        var url = "{{URL::to('/')}}/option/delete-option/"+id;
+                        $.ajax({
+                            url : url,
+                            type: "DELETE",
+                            data:{
+                                _token: "{{ csrf_token() }}",
+                                name: name
+                            },
+                            success: function(data, textStatus, jqXHR)
+                            {
+                                var result = JSON.parse(data);
+                                if(result.is_ok){
+                                    $('#row_option_'+result.option_id).remove();
+                                    toastr.success(result.message);
+                                }else{
+                                    toastr.error(result.message);
+                                }
+                                //data - response from server
+                            },
+                            error: function (jqXHR, textStatus, errorThrown)
+                            {
+                        
+                            }
+                        });
                     }
-                });
-                console.log(id,name);
+                })
             });
 
             $(document).on('click','.btn-save-edit',function(){
@@ -201,6 +203,8 @@
 
             $(document).on('click','#btn-save',function(e){
                 e.preventDefault();
+                var this_btn = $(this);
+                this_btn.prop('disabled',true);
                 var data = $('#form_option').serialize();
                 $.ajax({
                     url : "{{route($_page.'.update',[$data->id])}}",
@@ -222,13 +226,31 @@
                         }else{
                             toastr.error(result.message);
                         }
+                        this_btn.prop('disabled',false);
                         //data - response from server
                     },
                     error: function (jqXHR, textStatus, errorThrown)
                     {
-                        
+                        this_btn.prop('disabled',false);
                     }
                 });
+            })
+
+            $(document).on('click','#btn-delete-opt',function(e){
+                e.preventDefault();
+                var url = $(this).attr('href');
+                Swal.fire({
+                    title: 'Do you delete this data ?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete',
+                    }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.value) {
+                        window.location.replace(url);
+                    }
+                })
+                
+
             })
         });
     </script>
