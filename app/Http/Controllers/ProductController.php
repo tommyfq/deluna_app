@@ -11,6 +11,7 @@ use App\Models\Stock;
 use App\Models\Category;
 use App\Models\Option;
 use App\Models\OptionType;
+use DB;
 
 class ProductController extends Controller {
 
@@ -118,7 +119,12 @@ class ProductController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
-            // 'type' => 'required',
+            'category' => 'required',
+            'option_0' => 'required',
+            'option_1' => 'required',
+            'type_0' => 'required',
+            'type_1' => 'required',
+            'stocks' => 'required',
             'is_active' => 'required',
         ];
         $custom = [
@@ -128,22 +134,45 @@ class ProductController extends Controller {
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }
+        if(count($request->option_0) != count($request->option_1) && count($request->option_0) != count($request->stocks)){
+            Session::flash('message.error', 'Options and Stocks not valid!');
+            return redirect()->back()->withInput();
+        }
         // check if category exist
         $check = Product::where(['name' => $request->name, 'deleted_at' => NULL])->first();
         if($check){
             Session::flash('message.error', ucwords($this->page).' already exists!');
             return redirect()->back();
         }
-        // create new category
-        $category = new Product;
-        $category->name = $request->name;
-        $category->type = $request->type ? $request->type : $this->page;
-        $category->created_by = Session::get('user')->id;
-        $category->is_active = $request->is_active === 'true' ? true: false;
-        if($category->save()){
+        DB::beginTransaction();
+        try {
+            // create new product
+            $product = new Product;
+            $product->name = $request->name;
+            $product->category_id = $request->category;
+            $product->description = $request->description ? $request->description : '';
+            $product->type_1 = $request->type_0;
+            $product->type_2 = $request->type_1;
+            $product->created_by = Session::get('user')->id;
+            $product->is_active = $request->is_active === 'true' ? true: false;
+            $product->save();
+            // insert stocks
+            for($i=0; $i<count($request->option_0); $i++){
+                $arr = [
+                    'product_id' => $product->id,
+                    'option_1'=> $request->option_0[$i],
+                    'option_2' =>  $request->option_1[$i]
+                ];
+                $stock = Stock::firstOrNew($arr);
+                $stock->stock = $stock->stock + $request->stocks[$i];
+                $stock->created_by = Session::get('user')->id;
+                $stock->save();
+            }
+            DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been created!');
             return redirect()->route($this->page.'.index');
-        } else {
+        } catch (\Exception $e) {
+            DB::rollback();
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back();
         }
@@ -154,13 +183,30 @@ class ProductController extends Controller {
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
 
-        $category = Product::where(['id' => $slug, 'deleted_at' => NULL])->first();
-        if(!$category){
+        $product = Product::leftJoin(with(new OptionType)->getTable().' as type1', function($join){
+                                $join->on('type1.id', with(new Product)->getTable().'.type_1');
+                            })
+                            ->leftJoin(with(new OptionType)->getTable().' as type2', function($join){
+                                $join->on('type2.id', with(new Product)->getTable().'.type_2');
+                            })
+                            ->where([with(new Product)->getTable().'.id' => $slug, with(new Product)->getTable().'.deleted_at' => NULL])
+                            ->select(with(new Product)->getTable().'.*', 'type1.name as type_1_name', 'type2.name as type_2_name')
+                            ->first();
+        if(!$product){
             Session::flash('message.error', "Data not found!");
             return redirect()->route($this->page.'.index');
         }
-        $param['data'] = $category;
-        $param['type'] = Category::TYPE;
+        $category = Category::where(['is_active' => 1])->get();
+        $param['_category'] = $category;
+        $opt_type = OptionType::where(['is_active' => 1])->get();
+        $param['_opt_type'] = $opt_type;
+        $option_1 = Option::where(['option_type_id' => $product->type_1, 'deleted_at' => NULL])->get(['id', 'name']);
+        $option_2 = Option::where(['option_type_id' => $product->type_2, 'deleted_at' => NULL])->get(['id', 'name']);
+        $param['_option_1'] = $option_1;
+        $param['_option_2'] = $option_2;
+        $stock = Stock::where('product_id', $product->id)->get();
+        $param['_stock'] = $stock;
+        $param['data'] = $product;
         $param['_page'] = $this->page;
         $viewtarget = "pages.".$this->page.".edit";
         $content = view($viewtarget, $param);
@@ -172,7 +218,12 @@ class ProductController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
-            // 'type' => 'required',
+            'category' => 'required',
+            'option_0' => 'required',
+            'option_1' => 'required',
+            'type_0' => 'required',
+            'type_1' => 'required',
+            'stocks' => 'required',
             'is_active' => 'required',
         ];
         $custom = [
@@ -182,24 +233,43 @@ class ProductController extends Controller {
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }
+        if(count($request->option_0) != count($request->option_1) && count($request->option_0) != count($request->stocks)){
+            Session::flash('message.error', 'Options and Stocks not valid!');
+            return redirect()->back()->withInput();
+        }
         // check if category exist
-        $category = Product::find($slug);
-        if(!$category){
+        $product = Product::find($slug);
+        if(!$product){
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
         // update category
-        $array = [
-            'name' => $request->name,
-            'type' => $request->type ? $request->type : $this->page,
-            'is_active' => $request->is_active === 'true' ? true: false,
-            'updated_by' => Session::get('user')->id,
-        ];
-        $category = Product::where('id', $slug)->update($array);
-        if($category){
+        DB::beginTransaction();
+        try {
+            $array = [
+                'name' => $request->name,
+                'category_id' => $request->category,
+                'description' => $request->description ? $request->description : '',
+                'is_active' => $request->is_active === 'true' ? true: false,
+                'updated_by' => Session::get('user')->id,
+            ];
+            $product = Product::where('id', $slug)->update($array);
+            for($i=0; $i<count($request->option_0); $i++){
+                $arr = [
+                    'product_id' => $slug,
+                    'option_1'=> $request->option_0[$i],
+                    'option_2' =>  $request->option_1[$i]
+                ];
+                $stock = Stock::firstOrNew($arr);
+                $stock->stock = $stock->stock + $request->stocks[$i];
+                $stock->updated_by = Session::get('user')->id;
+                $stock->save();
+            }
+            DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been updated!');
-            return redirect()->route($this->page.'.index');
-        } else {
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollback();
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back();
         }
@@ -211,13 +281,16 @@ class ProductController extends Controller {
             return redirect()->back();
         }
         // check if category exist
-        $category = Product::find($slug);
-        if(!$category){
+        $product = Product::find($slug);
+        if(!$product){
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
         Product::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
-        if($category->delete()){
+        if($product->delete()){
+            // delete all stocks
+            Stock::where('product_id', $slug)->update(['deleted_by' => Session::get('user')->id]);
+            Stock::where('product_id', $slug)->delete();
             Session::flash('message.success', ucwords($this->page).' has been deleted!');
             return redirect()->route($this->page.'.index');
         } else {
@@ -250,5 +323,87 @@ class ProductController extends Controller {
             );
             return json_encode($response);
         }
+    }
+
+    public function update_stock(Request $request, $slug){
+        $response = array(
+            "is_ok" => false,
+            "message" => "Request is not ajax"
+        );
+        if(!$request->ajax()){
+            return json_encode($response);
+        }
+        if(!$request->opt_0 || !$request->opt_1 || !$request->stock || !$slug){
+            return json_encode(array(
+                "is_ok" => false,
+                "message" => "Request can't be fulfilled because the data not valid!"
+            ));
+        }
+        // check data
+        $stock = Stock::find($slug);
+        if(!$stock){
+            return json_encode(array(
+                "is_ok" => false,
+                "message" => "Data not found!"
+            ));
+        }
+        // update
+        $stock->option_1 = $request->opt_0;
+        $stock->option_2 = $request->opt_1;
+        $stock->stock = $request->stock;
+        $stock->updated_by =Session::get('user')->id;
+        
+        if($stock->save()){
+            return json_encode(array(
+                "is_ok" => true,
+                "message" => 'Stock updated!'
+            ));
+        } else {
+            return json_encode(array(
+                "is_ok" => false,
+                "message" => "There is an error while saving the data!"
+            ));
+        }
+
+    }
+
+    public function delete_stock(Request $request, $slug){
+        $response = array(
+            "is_ok" => false,
+            "message" => "Request is not ajax"
+        );
+        if(!$request->ajax()){
+            return json_encode($response);
+        }
+        if(!$slug){
+            return json_encode(array(
+                "is_ok" => false,
+                "message" => "Request can't be fulfilled because the data not valid!"
+            ));
+        }
+        // check data
+        $stock = Stock::find($slug);
+        if(!$stock){
+            return json_encode(array(
+                "is_ok" => false,
+                "message" => "Data not found!"
+            ));
+        }
+        // update
+        $stock->deleted_by =Session::get('user')->id;
+        
+        if($stock->save()){
+            $stock->delete();
+            return json_encode(array(
+                "is_ok" => true,
+                "message" => 'Stock updated!'
+            ));
+        } else {
+            return json_encode(array(
+                "is_ok" => false,
+                "message" => "There is an error while saving the data!"
+            ));
+        }
+
     }
 }

@@ -74,5 +74,7 @@ Route::middleware('check.user')->group(function(){
         Route::put('/{slug}', [ProductController::class, 'update'])->name('product.update');
         Route::get('/delete/{slug}', [ProductController::class, 'delete'])->name('product.delete');
         Route::post('get-options', [ProductController::class, 'get_options'])->name('product.getoptions');
+        Route::put('/update-stock/{slug}', [ProductController::class, 'update_stock'])->name('product.update-stock');
+        Route::delete('/delete-stock/{slug}', [ProductController::class, 'delete_stock'])->name('product.delete-stock');
     });
 });

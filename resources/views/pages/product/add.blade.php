@@ -20,6 +20,13 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="description">Product Description
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" id="description" name="description" placeholder="Enter your product description" >
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="category">Category <span class="text-danger">*</span></label>
                                 <div class="col-lg-6">
                                     <select class="form-control" id="category" name="category" required>
@@ -76,10 +83,7 @@
                                             </select>
                                         </div>
                                         <div class="col-lg-3">
-                                            <input type="text" class="form-control option-name" name="stocks[]" placeholder="Enter options" required>
-                                        </div>
-                                        <div class="col-lg-1">
-                                            <button type="button" class="btn btn-danger btn-del-option"> <i class="fa fa-trash"></i></button>
+                                            <input type="number" min=0 class="form-control option-name" name="stocks[]" placeholder="Enter Stock" required>
                                         </div>
                                     </div>
                                 </div>
@@ -111,7 +115,6 @@
                     return false;
                 }
                 $('#lbl_type_'+num).text(txt);
-                console.log(num);
                 // get data
                 await get_data(value, num);
                 let lbl1 = $('#lbl_type_0').text();
@@ -127,18 +130,41 @@
                         $('.options-div').show();
                         // remove and append
                         $('.option-0 option, .option-1 option').remove();
-                        console.log(opt_list.length, opt_list)
-                        // for(let i=0; i<opt_list.length; i++){
-                        //     // console.log(opt_list[i], opt_list.length)
-                        //     $('.option-'+i).append(opt_list[i]);
-                        // }
-                        // $('.option-0').append(opt_list[0]);
-                        // $('.option-1').append(opt_list[1]);
+                        for(let i=0; i<opt_list.length; i++){
+                            $('.option-'+i).append(opt_list[i].idx);
+                        }
                     }
                 } else{
                     $('.options-div').hide();
                 }
             });
+
+            $('#btn-add').click(function(e){
+                let html = `<div class="form-group row list-stock">
+                                <div class="col-lg-3">
+                                    <select class="form-control option-0" name="option_0[]" required>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3">
+                                    <select class="form-control option-1" name="option_1[]" required>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3">
+                                    <input type="number" min=0 class="form-control option-name" name="stocks[]" placeholder="Enter Stock" required>
+                                </div>
+                                <div class="col-lg-1">
+                                    <button type="button" class="btn btn-danger btn-del-option"> <i class="fa fa-trash"></i></button>
+                                </div>
+                            </div>`;
+                $('.container-opt').append(html);
+                for(let i=0; i<opt_list.length; i++){
+                    $('.option-'+i).append(opt_list[i].idx);
+                }
+            });
+            
+            $(document).on('click','.btn-del-option',function(){
+                $(this).closest('.list-stock').remove();
+            })
 
             async function get_data(id, idx){
                 let url = "{{route('product.getoptions')}}";
@@ -158,8 +184,6 @@
                                 html += '<option value="'+val.id+'">'+val.name+'</option>';
                             });
                             opt_list.push({idx:html});
-                            //opt_list[idx] = html;
-                            console.log(opt_list);
                         } else {
                             delete opt_list[idx]
                             toastr.error(
