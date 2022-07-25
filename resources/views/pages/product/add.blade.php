@@ -16,14 +16,14 @@
                                 <label class="col-lg-4 col-form-label" for="name">Product Name <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter your product name" required>
+                                    <input type="text" class="form-control" id="name" name="name" value="{{old('name')}}" placeholder="Enter your product name" required>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="description">Product Description
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="description" name="description" placeholder="Enter your product description" >
+                                    <input type="text" class="form-control" id="description" name="description" value="{{old('description')}}" placeholder="Enter your product description" >
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -33,7 +33,7 @@
                                         <option value="">Select Category</option>
                                         @if($_category)
                                             @foreach($_category as $val)
-                                                <option value="{{$val->id}}">{{$val->name}}</option>
+                                                <option value="{{$val->id}}" {{old('category') == $val->id ? 'selected' : ''}}>{{$val->name}}</option>
                                             @endforeach
                                         @endif
                                     </select>
@@ -41,9 +41,9 @@
                             </div>
                             @for($i=0; $i<2; $i++)
                             <div class="form-group row">
-                                <label class="col-lg-4 col-form-label" for="type">Select Type {{$i+1}} <span class="text-danger">*</span></label>
+                                <label class="col-lg-4 col-form-label" for="type">Select Type {{$i+1}} {!!$i%2 != 0 ? '' : '<span class="text-danger">*</span>'!!}</label>
                                 <div class="col-lg-6">
-                                    <select class="form-control type" id="type_{{$i}}" name="type_{{$i}}" required>
+                                    <select class="form-control type" id="type_{{$i}}" name="type_{{$i}}" {{$i%2 != 0 ? '' : 'required'}}>
                                         <option value="">Select Data</option>
                                         @if($_opt_type)
                                             @foreach($_opt_type as $val)
@@ -66,23 +66,31 @@
                             <hr>
                             <div class="options-div" style="display: none;">
                                 <div class="form-group row">
-                                    <label class="col-lg-3 col-form-label" id="lbl_type_0" for="type"></label>
-                                    <label class="col-lg-3 col-form-label" id="lbl_type_1" for="type"></label>
-                                    <label class="col-lg-3 col-form-label" for="stock"> Stock </label>
+                                    <label class="col-lg-2 col-form-label" id="lbl_type_0" for="type" style="display: none;"></label>
+                                    <label class="col-lg-2 col-form-label" id="lbl_type_1" for="type" style="display: none;"></label>
+                                    <label class="col-lg-2 col-form-label" for="price"> Price </label>
+                                    <label class="col-lg-2 col-form-label" for="sales_price"> Sales Price </label>
+                                    <label class="col-lg-2 col-form-label" for="stock"> Stock </label>
                                 </div>
                                 <div class="container-opt">
                                     <div class="form-group row">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-2 opt-0" style="display: none">
                                             <select class="form-control option-0" name="option_0[]" required>
                                                 <option value="">Select Data</option>
                                             </select>
                                         </div>
-                                        <div class="col-lg-3">
-                                            <select class="form-control option-1" name="option_1[]" required>
+                                        <div class="col-lg-2 opt-1" style="display: none">
+                                            <select class="form-control option-1" name="option_1[]">
                                                 <option value="">Select Data</option>
                                             </select>
                                         </div>
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-2">
+                                            <input type="number" min=0 class="form-control option-name" name="price[]" placeholder="Enter Price" required>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <input type="number" min=0 class="form-control option-name" name="sales_price[]" placeholder="Enter Sales Price" required>
+                                        </div>
+                                        <div class="col-lg-2">
                                             <input type="number" min=0 class="form-control option-name" name="stocks[]" placeholder="Enter Stock" required>
                                         </div>
                                     </div>
@@ -107,32 +115,54 @@
         $(document).ready(function(){
             var opt_list = [];
             $(document).find("select[id^='type_']").on('change', async function(){
+                $('.options-div').hide();
+                $('.list-stock').remove();
                 let value = $('#'+this.id).find(":selected").val();
                 let num = this.id.split('_')[1];
                 let txt = $('#'+this.id).find(":selected").text();
-                if(!value){
-                    $('#lbl_type_'+num).text('');
-                    return false;
-                }
                 $('#lbl_type_'+num).text(txt);
                 // get data
                 await get_data(value, num);
                 let lbl1 = $('#lbl_type_0').text();
                 let lbl2 = $('#lbl_type_1').text();
-                if(lbl1 && lbl2){
+                if(lbl1){
                     if(lbl1 == lbl2){
                         toastr.error(
                             'Type has same value!',
                             "Top Right",
                         )
-                        $('.options-div').hide();
                     } else {
                         $('.options-div').show();
-                        // remove and append
                         $('.option-0 option, .option-1 option').remove();
-                        for(let i=0; i<opt_list.length; i++){
-                            $('.option-'+i).append(opt_list[i].idx);
+                        let side = '';
+                        if((lbl1 && lbl1 !== 'Select Data') && (lbl2 && lbl2 !== 'Select Data')){
+                            side = '';
+                            $('#lbl_type_0').css('display','block');
+                            $('#lbl_type_1').css('display','block');
+                            $('.opt-0').css('display','block');
+                            $('.opt-1').css('display','block');
+                            $('.option-0').append(opt_list[0]);
+                            $('.option-1').append(opt_list[1]);
+                        } else if(lbl1 && lbl1 !== 'Select Data'){
+                            side = 1;
+                            $('#lbl_type_'+num).css('display','block');
+                            $('#lbl_type_'+side).css('display','none');
+                            $('.opt-'+num).css('display','block');
+                            $('.opt-'+side).css('display','none');
+                            if(num == 0)
+                                $('.option-'+num).append(opt_list[num]);
+                            else
+                                $('.option-0').append(opt_list[0]);
+                        } else if(lbl2 && lbl2 !== 'Select Data'){
+                            side = 0;
+                            $('#lbl_type_'+num).css('display','block');
+                            $('#lbl_type_'+side).css('display','none');
+                            $('.opt-'+num).css('display','block');
+                            $('.opt-'+side).css('display','none');
+                            if(num == 1)
+                                $('.option-'+num).append(opt_list[num]);
                         }
+                        console.log('side: ', side, 'num: ', num, 'lbl1: ', lbl1, 'lbl2: ', lbl2, opt_list)
                     }
                 } else{
                     $('.options-div').hide();
@@ -140,19 +170,29 @@
             });
 
             $('#btn-add').click(function(e){
+                let lbl1 = $('#lbl_type_0').text();
+                let lbl2 = $('#lbl_type_1').text();
                 let html = `<div class="form-group row list-stock">
-                                <div class="col-lg-3">
+                                <div class="col-lg-2">
                                     <select class="form-control option-0" name="option_0[]" required>
                                     </select>
+                                </div>`;
+                if(lbl2 && lbl2 !== 'Select Data'){
+                    html+= `<div class="col-lg-2">
+                                <select class="form-control option-1" name="option_1[]">
+                                </select>
+                            </div>`
+                }
+                html+= `<div class="col-lg-2">
+                                    <input type="number" min=0 class="form-control option-price" name="price[]" placeholder="Enter Price" required>
                                 </div>
-                                <div class="col-lg-3">
-                                    <select class="form-control option-1" name="option_1[]" required>
-                                    </select>
+                                <div class="col-lg-2">
+                                    <input type="number" min=0 class="form-control option-sales-price" name="sales_price[]" placeholder="Enter Sales Price" required>
                                 </div>
-                                <div class="col-lg-3">
-                                    <input type="number" min=0 class="form-control option-name" name="stocks[]" placeholder="Enter Stock" required>
+                                <div class="col-lg-2">
+                                    <input type="number" min=0 class="form-control option-stock" name="stocks[]" placeholder="Enter Stock" required>
                                 </div>
-                                <div class="col-lg-1">
+                                <div class="col-lg-2">
                                     <button type="button" class="btn btn-danger btn-del-option"> <i class="fa fa-trash"></i></button>
                                 </div>
                             </div>`;
@@ -179,11 +219,11 @@
                     {
                         var result = JSON.parse(data);
                         if(result.is_ok){
-                            var html = '<option> Select Data </option>';
+                            var html = '<option value=""> Select Data </option>';
                             $.each(result.data, function(idx, val){
                                 html += '<option value="'+val.id+'">'+val.name+'</option>';
                             });
-                            opt_list.push({idx:html});
+                            opt_list[idx] = html
                         } else {
                             delete opt_list[idx]
                             toastr.error(
@@ -208,6 +248,7 @@
                                     tapToDismiss:!1
                                 })
                         }
+                        console.log(opt_list)
                     },
                     error: function (jqXHR, textStatus, errorThrown)
                     {

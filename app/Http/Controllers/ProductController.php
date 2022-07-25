@@ -11,6 +11,7 @@ use App\Models\Stock;
 use App\Models\Category;
 use App\Models\Option;
 use App\Models\OptionType;
+use App\Models\Log;
 use DB;
 
 class ProductController extends Controller {
@@ -121,10 +122,10 @@ class ProductController extends Controller {
             'name' => 'required',
             'category' => 'required',
             'option_0' => 'required',
-            'option_1' => 'required',
             'type_0' => 'required',
-            'type_1' => 'required',
             'stocks' => 'required',
+            'price' => 'required',
+            'sales_price' => 'required',
             'is_active' => 'required',
         ];
         $custom = [
@@ -134,7 +135,7 @@ class ProductController extends Controller {
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }
-        if(count($request->option_0) != count($request->option_1) && count($request->option_0) != count($request->stocks)){
+        if(count($request->option_0) != count($request->price) && count($request->option_0) != count($request->sales_price) && count($request->option_0) != count($request->stocks)){
             Session::flash('message.error', 'Options and Stocks not valid!');
             return redirect()->back()->withInput();
         }
@@ -145,6 +146,7 @@ class ProductController extends Controller {
             return redirect()->back();
         }
         DB::beginTransaction();
+        DB::enableQueryLog();
         try {
             // create new product
             $product = new Product;
@@ -152,7 +154,7 @@ class ProductController extends Controller {
             $product->category_id = $request->category;
             $product->description = $request->description ? $request->description : '';
             $product->type_1 = $request->type_0;
-            $product->type_2 = $request->type_1;
+            $product->type_2 = $request->type_1 ? $request->type_1 : null;
             $product->created_by = Session::get('user')->id;
             $product->is_active = $request->is_active === 'true' ? true: false;
             $product->save();
@@ -160,21 +162,32 @@ class ProductController extends Controller {
             for($i=0; $i<count($request->option_0); $i++){
                 $arr = [
                     'product_id' => $product->id,
-                    'option_1'=> $request->option_0[$i],
-                    'option_2' =>  $request->option_1[$i]
+                    'option_1' => $request->option_0[$i]
                 ];
                 $stock = Stock::firstOrNew($arr);
+                $stock->option_2 = $request->option_1[$i];
                 $stock->stock = $stock->stock + $request->stocks[$i];
+                $stock->price = $request->price[$i];
+                $stock->sales_price = $request->sales_price[$i];
                 $stock->created_by = Session::get('user')->id;
                 $stock->save();
+                // insert log
+                $log = new Log;
+                $log->reference_id = $stock->id;
+                $log->type = 'new';
+                $log->stock_from = 0;
+                $log->stock_to = $stock->stock;
+                $log->created_by = Session::get('user')->id;
+                $log->save();
             }
             DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been created!');
             return redirect()->route($this->page.'.index');
         } catch (\Exception $e) {
             DB::rollback();
+            dd(DB::getQueryLog());
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
-            return redirect()->back();
+            return redirect()->back()->withInput();
         }
     }
 
