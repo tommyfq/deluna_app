@@ -29,6 +29,11 @@
                     <li><a href="{{route('product.index')}}">Product</a></li>
                 </ul>
             </li>
+            <li>
+                <a href="{{route('order.index')}}" aria-expanded="false">
+                    <i class="icon-basket menu-icon"></i><span class="nav-text">Order</span>
+                </a>
+            </li>
         </ul>
     </div>
 </div>

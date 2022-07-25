@@ -13,14 +13,48 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-lg-4 col-form-label" for="name">Option Type Name <span class="text-danger">*</span>
+                                <label class="col-lg-4 col-form-label" for="name">Customer Name <span class="text-danger">*</span>
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter option name" required>
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter your product name" required>
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-lg-4 col-form-label" for="is_active">Active</label>
+                                <label class="col-lg-4 col-form-label" for="description">Customer Phone
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" id="description" name="description" placeholder="Enter your product description" >
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="description">Customer Email
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your product description" >
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="description">Address
+                                </label>
+                                <div class="col-lg-6">
+                                    <textarea class="form-control" id="address" name="address" placeholder="Enter Address">{{old('address')}}</textarea>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="category">Sales Channel <span class="text-danger">*</span></label>
+                                <div class="col-lg-6">
+                                    <select class="form-control" id="category" name="category" required>
+                                        <option value="">Select Sales Channel</option>
+                                        @if($_sales_channel)
+                                            @foreach($_sales_channel as $val)
+                                                <option value="{{$val->id}}">{{$val->name}}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="is_active">Active <span class="text-danger">*</span></label>
                                 <div class="col-lg-6">
                                     <label class="radio-inline mr-3">
                                         <input type="radio" name="is_active" value="true" checked>Active</label>
