@@ -165,7 +165,8 @@ class ProductController extends Controller {
                     'option_1' => $request->option_0[$i]
                 ];
                 $stock = Stock::firstOrNew($arr);
-                $stock->option_2 = $request->option_1[$i];
+                if($request->option_1)
+                    $stock->option_2 = $request->option_1[$i];
                 $stock->stock = $stock->stock + $request->stocks[$i];
                 $stock->price = $request->price[$i];
                 $stock->sales_price = $request->sales_price[$i];
@@ -233,9 +234,6 @@ class ProductController extends Controller {
             'name' => 'required',
             'category' => 'required',
             'option_0' => 'required',
-            'option_1' => 'required',
-            'type_0' => 'required',
-            'type_1' => 'required',
             'stocks' => 'required',
             'is_active' => 'required',
         ];
@@ -270,13 +268,27 @@ class ProductController extends Controller {
             for($i=0; $i<count($request->option_0); $i++){
                 $arr = [
                     'product_id' => $slug,
-                    'option_1'=> $request->option_0[$i],
-                    'option_2' =>  $request->option_1[$i]
+                    'option_1'=> $request->option_0[$i]
                 ];
+                if($request->option_1)
+                    $arr['option_2'] = $request->option_1[$i];
                 $stock = Stock::firstOrNew($arr);
-                $stock->stock = $stock->stock + $request->stocks[$i];
+                $stock_from = $stock->stock;
+                if($request->option_1)
+                    $stock->option_2 = $request->option_1[$i];
+                $stock->stock = $stock_from + $request->stocks[$i];
+                $stock->price = $request->price[$i];
+                $stock->sales_price = $request->sales_price[$i];
                 $stock->updated_by = Session::get('user')->id;
                 $stock->save();
+                // insert log
+                $log = new Log;
+                $log->reference_id = $stock->id;
+                $log->type = 'update';
+                $log->stock_from = $stock_from;
+                $log->stock_to = $stock->stock;
+                $log->created_by = Session::get('user')->id;
+                $log->save();
             }
             DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been updated!');
@@ -360,13 +372,25 @@ class ProductController extends Controller {
                 "message" => "Data not found!"
             ));
         }
+        $stock_from = $stock->stock;
         // update
         $stock->option_1 = $request->opt_0;
         $stock->option_2 = $request->opt_1;
         $stock->stock = $request->stock;
+        $stock->price = $request->price;
+        $stock->sales_price = $request->sales_price;
         $stock->updated_by =Session::get('user')->id;
-        
+
         if($stock->save()){
+            // insert log
+            $log = new Log;
+            $log->reference_id = $stock->id;
+            $log->type = 'update';
+            $log->stock_from = $stock_from;
+            $log->stock_to = $stock->stock;
+            $log->created_by = Session::get('user')->id;
+            $log->save();
+
             return json_encode(array(
                 "is_ok" => true,
                 "message" => 'Stock updated!'
@@ -404,9 +428,17 @@ class ProductController extends Controller {
         }
         // update
         $stock->deleted_by =Session::get('user')->id;
-        
+        $stock_from = $stock->stock;
         if($stock->save()){
             $stock->delete();
+            // insert log
+            $log = new Log;
+            $log->reference_id = $stock->id;
+            $log->type = 'delete_stock';
+            $log->stock_from = $stock_from;
+            $log->stock_to = 0;
+            $log->created_by = Session::get('user')->id;
+            $log->save();
             return json_encode(array(
                 "is_ok" => true,
                 "message" => 'Stock updated!'

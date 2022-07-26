@@ -198,7 +198,7 @@
                             </div>`;
                 $('.container-opt').append(html);
                 for(let i=0; i<opt_list.length; i++){
-                    $('.option-'+i).append(opt_list[i].idx);
+                    $('.option-'+i).append(opt_list[i]);
                 }
             });
             

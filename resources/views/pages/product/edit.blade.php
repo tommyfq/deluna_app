@@ -48,7 +48,7 @@
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="type">Select Type {{$i+1}} <span class="text-danger">*</span></label>
                                 <div class="col-lg-6">
-                                    <select class="form-control type" id="type_{{$i}}" name="type_{{$i}}" required readonly>
+                                    <select class="form-control type" id="type_{{$i}}" name="type_{{$i}}" required disabled>
                                         <option value="">Select Data</option>
                                         @if($_opt_type)
                                             @foreach($_opt_type as $val)
@@ -71,14 +71,18 @@
                             <hr>
                             <div class="options-div">
                                 <div class="form-group row">
-                                    <label class="col-lg-3 col-form-label" id="lbl_type_0" for="type">{{ucwords($data->type_1_name)}}</label>
-                                    <label class="col-lg-3 col-form-label" id="lbl_type_1" for="type">{{ucwords($data->type_2_name)}}</label>
-                                    <label class="col-lg-3 col-form-label" for="stock"> Stock </label>
+                                    <label class="col-lg-2 col-form-label" id="lbl_type_0" for="type">{{ucwords($data->type_1_name)}}</label>
+                                    @if($data->type_2_name)
+                                    <label class="col-lg-2 col-form-label" id="lbl_type_1" for="type">{{ucwords($data->type_2_name)}}</label>
+                                    @endif
+                                    <label class="col-lg-2 col-form-label" for="price"> Price </label>
+                                    <label class="col-lg-2 col-form-label" for="sales_price"> Sales Price </label>
+                                    <label class="col-lg-2 col-form-label" for="stock"> Stock </label>
                                 </div>
                                 <div class="container-opt">
                                     @for($i=0; $i<count($_stock); $i++)
                                     <div class="form-group row option-row" id="row_{{$_stock[$i]->id}}" data-id="{{$_stock[$i]->id}}">
-                                        <div class="col-lg-3">
+                                        <div class="col-lg-2">
                                             <select class="form-control option-0" required>
                                                 <option value="">Select Data</option>
                                                 @foreach($_option_1 as $val)
@@ -86,18 +90,26 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-lg-3">
-                                            <select class="form-control option-1" required>
+                                        @if(count($_option_2) > 0)
+                                        <div class="col-lg-2">
+                                            <select class="form-control option-1">
                                                 <option value="">Select Data</option>
                                                 @foreach($_option_2 as $val)
                                                 <option value="{{$val->id}}" {{($_stock[$i]->option_2 == $val->id ? 'selected data-name='.$val->name : '')}}>{{$val->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-lg-3">
+                                        @endif
+                                        <div class="col-lg-2">
+                                            <input type="number" min=0 class="form-control option-price" placeholder="Enter Price" value="{{$_stock[$i]->price}}" required>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <input type="number" min=0 class="form-control option-sales-price" placeholder="Enter Sales Price" value="{{$_stock[$i]->sales_price}}" required>
+                                        </div>
+                                        <div class="col-lg-2">
                                             <input type="number" min=0 class="form-control option-stock" placeholder="Enter Stock" value="{{$_stock[$i]->stock}}" required>
                                         </div>
-                                        <div class="col-lg-3 btn-container">
+                                        <div class="col-lg-2 btn-container">
                                             <button type="button" class="btn btn-info btn-edit"><i class="fa fa-pencil"></i></button>
                                             <button type="button" class="btn btn-success btn-save-edit d-none"><i class="fa fa-check"></i></button>
                                             <button type="button" class="btn btn-danger btn-cancel-edit d-none"><i class="fa fa-close"></i></button>
@@ -129,25 +141,34 @@
         $(document).ready(async function(){
             var opt_list = [];
             $('#btn-add').click(async function(e){
+                let lbl1 = $('#lbl_type_0').text();
+                let lbl2 = $('#lbl_type_1').text();
                 await get_data("{{$data["type_1"]}}", 0);
                 await get_data("{{$data["type_2"]}}", 1);
                 let html = `<div class="form-group row list-stock">
-                                <div class="col-lg-3">
+                                <div class="col-lg-2">
                                     <select class="form-control option-0" name="option_0[]" required>
                                     </select>
+                                </div>`;
+                if(lbl2 && lbl2 !== 'Select Data'){
+                    html+= `<div class="col-lg-2">
+                                <select class="form-control option-1" name="option_1[]">
+                                </select>
+                            </div>`
+                }
+                html+= `<div class="col-lg-2">
+                                    <input type="number" min=0 class="form-control option-price" name="price[]" placeholder="Enter Price" required>
                                 </div>
-                                <div class="col-lg-3">
-                                    <select class="form-control option-1" name="option_1[]" required>
-                                    </select>
+                                <div class="col-lg-2">
+                                    <input type="number" min=0 class="form-control option-sales-price" name="sales_price[]" placeholder="Enter Sales Price" required>
                                 </div>
-                                <div class="col-lg-3">
-                                    <input type="number" min=0 class="form-control option-name" name="stocks[]" placeholder="Enter Stock" required>
+                                <div class="col-lg-2">
+                                    <input type="number" min=0 class="form-control option-stock" name="stocks[]" placeholder="Enter Stock" required>
                                 </div>
-                                <div class="col-lg-1">
+                                <div class="col-lg-2">
                                     <button type="button" class="btn btn-danger btn-del-option"> <i class="fa fa-trash"></i></button>
                                 </div>
                             </div>`;
-                            
                 $('.container-opt').append(html);
                 for(let i=0; i<opt_list.length; i++){
                     $('.option-'+i).append(opt_list[i].idx);
