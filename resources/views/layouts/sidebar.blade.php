@@ -28,6 +28,9 @@
                 <ul aria-expanded="false">
                     <li><a href="{{route('product.index')}}">Product</a></li>
                 </ul>
+                <ul aria-expanded="false">
+                    <li><a href="{{route('role.index')}}">Roles</a></li>
+                </ul>
             </li>
             <li>
                 <a href="{{route('order.index')}}" aria-expanded="false">

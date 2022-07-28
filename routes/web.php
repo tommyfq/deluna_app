@@ -9,6 +9,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\OrderController;
 /*
 |--------------------------------------------------------------------------
@@ -77,6 +78,18 @@ Route::middleware('check.user')->group(function(){
         Route::post('get-options', [ProductController::class, 'get_options'])->name('product.getoptions');
         Route::put('/update-stock/{slug}', [ProductController::class, 'update_stock'])->name('product.update-stock');
         Route::delete('/delete-stock/{slug}', [ProductController::class, 'delete_stock'])->name('product.delete-stock');
+    });
+    Route::prefix('role')->group(function(){
+        Route::get('/', [RoleController::class, 'index'])->name('role.index');
+        Route::get('/list', [RoleController::class, 'get'])->name('role.list');
+        Route::get('add', [RoleController::class, 'add'])->name('role.add');
+        Route::post('/', [RoleController::class, 'store'])->name('role.store');
+        Route::get('/edit/{slug}', [RoleController::class, 'edit'])->name('role.edit');
+        Route::put('/{slug}', [RoleController::class, 'update'])->name('role.update');
+        Route::get('/delete/{slug}', [RoleController::class, 'delete'])->name('role.delete');
+        Route::post('get-options', [RoleController::class, 'get_options'])->name('role.getoptions');
+        Route::put('/update-stock/{slug}', [RoleController::class, 'update_stock'])->name('role.update-stock');
+        Route::delete('/delete-stock/{slug}', [RoleController::class, 'delete_stock'])->name('role.delete-stock');
     });
     Route::prefix('order')->group(function(){
         Route::get('/', [OrderController::class, 'index'])->name('order.index');
