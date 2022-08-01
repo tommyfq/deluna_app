@@ -146,7 +146,6 @@ class ProductController extends Controller {
             return redirect()->back();
         }
         DB::beginTransaction();
-        DB::enableQueryLog();
         try {
             // create new product
             $product = new Product;
@@ -186,7 +185,6 @@ class ProductController extends Controller {
             return redirect()->route($this->page.'.index');
         } catch (\Exception $e) {
             DB::rollback();
-            dd(DB::getQueryLog());
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back()->withInput();
         }

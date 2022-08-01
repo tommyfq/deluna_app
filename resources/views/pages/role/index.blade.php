@@ -22,7 +22,7 @@
                                 <table class="table table-bordered verticle-middle yajra-datatable">
                                     <thead>
                                         <tr>
-                                            <th scope="col">Name</th>
+                                            <th scope="col">Role Name</th>
                                             <th scope="col">Active</th>
                                             <th scope="col">Action</th>
                                         </tr>
@@ -49,7 +49,7 @@
           serverSide: true,
           ajax: "{{ route($_page.'.list') }}",
           columns: [
-              {data: 'name', name: 'name'},
+              {data: 'role_name', name: 'role_name'},
               {data: 'is_active', name: 'active'},
               {
                   data: 'action', 

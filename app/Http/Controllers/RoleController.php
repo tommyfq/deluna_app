@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Role;
+use App\Models\RoleMapping;
+use App\Models\Menu;
+use App\Models\MenuAction;
 use DB;
 
 class RoleController extends Controller {
@@ -93,10 +96,18 @@ class RoleController extends Controller {
     }
 
     public function add() {
-        $param = array();
+        $param = $arr = $temp = array();
         $param['_title'] = 'Deluna | Add '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         $param['_page'] = $this->page;
+        $list_menu = Menu::get();
+        foreach($list_menu as $val){
+            $temp['menu_id'] = $val->id;
+            $temp['menu_name'] = $val->menu;
+            $temp['action'] = MenuAction::where('menu_id', $val->id)->get(['id as action_id', 'action_name']);
+            array_push($arr, (object)$temp);
+        }
+        $param['_menu'] = (object)$arr;
         
         $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
@@ -108,13 +119,7 @@ class RoleController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
-            'category' => 'required',
-            'option_0' => 'required',
-            'type_0' => 'required',
-            'stocks' => 'required',
-            'price' => 'required',
-            'sales_price' => 'required',
-            'is_active' => 'required',
+            'menu' => 'required'
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
@@ -123,92 +128,74 @@ class RoleController extends Controller {
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }
-        if(count($request->option_0) != count($request->price) && count($request->option_0) != count($request->sales_price) && count($request->option_0) != count($request->stocks)){
-            Session::flash('message.error', 'Options and Stocks not valid!');
-            return redirect()->back()->withInput();
-        }
-        // check if category exist
-        $check = Product::where(['name' => $request->name, 'deleted_at' => NULL])->first();
+        // check if role exist
+        $check = Role::where(['role_name' => $request->name, 'deleted_at' => NULL])->first();
         if($check){
             Session::flash('message.error', ucwords($this->page).' already exists!');
             return redirect()->back();
         }
         DB::beginTransaction();
-        DB::enableQueryLog();
         try {
-            // create new product
-            $product = new Product;
-            $product->name = $request->name;
-            $product->category_id = $request->category;
-            $product->description = $request->description ? $request->description : '';
-            $product->type_1 = $request->type_0;
-            $product->type_2 = $request->type_1 ? $request->type_1 : null;
-            $product->created_by = Session::get('user')->id;
-            $product->is_active = $request->is_active === 'true' ? true: false;
-            $product->save();
-            // insert stocks
-            for($i=0; $i<count($request->option_0); $i++){
-                $arr = [
-                    'product_id' => $product->id,
-                    'option_1' => $request->option_0[$i]
-                ];
-                $stock = Stock::firstOrNew($arr);
-                if($request->option_1)
-                    $stock->option_2 = $request->option_1[$i];
-                $stock->stock = $stock->stock + $request->stocks[$i];
-                $stock->price = $request->price[$i];
-                $stock->sales_price = $request->sales_price[$i];
-                $stock->created_by = Session::get('user')->id;
-                $stock->save();
-                // insert log
-                $log = new Log;
-                $log->reference_id = $stock->id;
-                $log->type = 'new';
-                $log->stock_from = 0;
-                $log->stock_to = $stock->stock;
-                $log->created_by = Session::get('user')->id;
-                $log->save();
+            // create new role
+            $role = new Role;
+            $role->role_name = $request->name;
+            $role->created_by = Session::get('user')->id;
+            $role->is_active = $request->is_active === 'true' ? true: false;
+            $role->save();
+            // insert mapping role
+            foreach($request->menu as $key => $val){
+                foreach($val as $cval){
+                    $arr = [
+                        'role_id' => $role->id,
+                        'menu_id' => $key,
+                        'action_id' => $cval
+                    ];
+                    $role_mapping = RoleMapping::firstOrNew($arr);
+                    $role_mapping->created_by = Session::get('user')->id;
+                    $role_mapping->save();
+                }
             }
             DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been created!');
             return redirect()->route($this->page.'.index');
         } catch (\Exception $e) {
             DB::rollback();
-            dd(DB::getQueryLog());
             Session::flash('message.error', 'Sorry there is an error while saving the data!');
             return redirect()->back()->withInput();
         }
     }
 
     public function edit($slug) {
-        $param = array();
+        $param = $arr = $temp = array();
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
 
-        $product = Product::leftJoin(with(new OptionType)->getTable().' as type1', function($join){
-                                $join->on('type1.id', with(new Product)->getTable().'.type_1');
-                            })
-                            ->leftJoin(with(new OptionType)->getTable().' as type2', function($join){
-                                $join->on('type2.id', with(new Product)->getTable().'.type_2');
-                            })
-                            ->where([with(new Product)->getTable().'.id' => $slug, with(new Product)->getTable().'.deleted_at' => NULL])
-                            ->select(with(new Product)->getTable().'.*', 'type1.name as type_1_name', 'type2.name as type_2_name')
-                            ->first();
-        if(!$product){
+        $role = Role::find($slug);
+        if(!$role){
             Session::flash('message.error', "Data not found!");
             return redirect()->route($this->page.'.index');
         }
-        $category = Category::where(['is_active' => 1])->get();
-        $param['_category'] = $category;
-        $opt_type = OptionType::where(['is_active' => 1])->get();
-        $param['_opt_type'] = $opt_type;
-        $option_1 = Option::where(['option_type_id' => $product->type_1, 'deleted_at' => NULL])->get(['id', 'name']);
-        $option_2 = Option::where(['option_type_id' => $product->type_2, 'deleted_at' => NULL])->get(['id', 'name']);
-        $param['_option_1'] = $option_1;
-        $param['_option_2'] = $option_2;
-        $stock = Stock::where('product_id', $product->id)->get();
-        $param['_stock'] = $stock;
-        $param['data'] = $product;
+
+        $list_menu = Menu::get();
+        foreach($list_menu as $val){
+            $temp['menu_id'] = $val->id;
+            $temp['menu_name'] = $val->menu;
+            $temp['action'] = MenuAction::where('menu_id', $val->id)->get(['id as action_id', 'action_name']);
+            foreach($temp['action'] as $cval){
+                $temps = RoleMapping::where(['role_id' => $slug, 'action_id' => $cval->action_id])->first();
+                if($temps){
+                    $cval->checked = true;
+                } else {
+                    $cval->checked = false;
+                }
+            }
+            array_push($arr, (object)$temp);
+        }
+        $param['_menu'] = (object)$arr;
+        // list checked
+        $mapping = RoleMapping::where(['role_id' => $slug])->get();
+        $param['_mapping'] = $mapping;
+        $param['data'] = $role;
         $param['_page'] = $this->page;
         $viewtarget = "pages.".$this->page.".edit";
         $content = view($viewtarget, $param);
@@ -220,10 +207,7 @@ class RoleController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
-            'category' => 'required',
-            'option_0' => 'required',
-            'stocks' => 'required',
-            'is_active' => 'required',
+            'menu' => 'required'
         ];
         $custom = [
             'required' => 'The :attribute field is required.',
@@ -232,13 +216,9 @@ class RoleController extends Controller {
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }
-        if(count($request->option_0) != count($request->option_1) && count($request->option_0) != count($request->stocks)){
-            Session::flash('message.error', 'Options and Stocks not valid!');
-            return redirect()->back()->withInput();
-        }
-        // check if category exist
-        $product = Product::find($slug);
-        if(!$product){
+        // check if role exist
+        $role = Role::find($slug);
+        if(!$role){
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
@@ -246,37 +226,22 @@ class RoleController extends Controller {
         DB::beginTransaction();
         try {
             $array = [
-                'name' => $request->name,
-                'category_id' => $request->category,
-                'description' => $request->description ? $request->description : '',
+                'role_name' => $request->name,
                 'is_active' => $request->is_active === 'true' ? true: false,
                 'updated_by' => Session::get('user')->id,
             ];
-            $product = Product::where('id', $slug)->update($array);
-            for($i=0; $i<count($request->option_0); $i++){
-                $arr = [
-                    'product_id' => $slug,
-                    'option_1'=> $request->option_0[$i]
-                ];
-                if($request->option_1)
-                    $arr['option_2'] = $request->option_1[$i];
-                $stock = Stock::firstOrNew($arr);
-                $stock_from = $stock->stock;
-                if($request->option_1)
-                    $stock->option_2 = $request->option_1[$i];
-                $stock->stock = $stock_from + $request->stocks[$i];
-                $stock->price = $request->price[$i];
-                $stock->sales_price = $request->sales_price[$i];
-                $stock->updated_by = Session::get('user')->id;
-                $stock->save();
-                // insert log
-                $log = new Log;
-                $log->reference_id = $stock->id;
-                $log->type = 'update';
-                $log->stock_from = $stock_from;
-                $log->stock_to = $stock->stock;
-                $log->created_by = Session::get('user')->id;
-                $log->save();
+            $role = Role::where('id', $slug)->update($array);
+            foreach($request->menu as $key => $val){
+                foreach($val as $cval){
+                    $arr = [
+                        'role_id' => $slug,
+                        'menu_id' => $key,
+                        'action_id' => $cval
+                    ];
+                    $role_mapping = RoleMapping::firstOrNew($arr);
+                    $role_mapping->created_by = Session::get('user')->id;
+                    $role_mapping->save();
+                }
             }
             DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been updated!');
@@ -294,16 +259,16 @@ class RoleController extends Controller {
             return redirect()->back();
         }
         // check if category exist
-        $product = Product::find($slug);
-        if(!$product){
+        $role = Role::find($slug);
+        if(!$role){
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
             return redirect()->back();
         }
-        Product::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
-        if($product->delete()){
+        Role::where('id',$slug)->update(['deleted_by' => Session::get('user')->id]);
+        if($role->delete()){
             // delete all stocks
-            Stock::where('product_id', $slug)->update(['deleted_by' => Session::get('user')->id]);
-            Stock::where('product_id', $slug)->delete();
+            RoleMapping::where('role_id', $slug)->update(['deleted_by' => Session::get('user')->id]);
+            RoleMapping::where('role_id', $slug)->delete();
             Session::flash('message.success', ucwords($this->page).' has been deleted!');
             return redirect()->route($this->page.'.index');
         } else {
@@ -311,132 +276,4 @@ class RoleController extends Controller {
             return redirect()->back();
         }
     }
-
-    // ajax here
-    public function get_options(Request $request){
-        if($request->ajax()){
-            if(!$request->id){
-                $response = array(
-                    "is_ok" => false,
-                    "message" => "No data given!"
-                );
-                return json_encode($response);
-            }
-            $data = Option::where(['option_type_id' => $request->id])->get(['id', 'name']);
-            $response = array(
-                "is_ok" => true,
-                "message" => "Data retrieved!",
-                "data" => $data
-            );
-            return json_encode($response);
-        } else {
-            $response = array(
-                "is_ok" => false,
-                "message" => "Request can't be received!"
-            );
-            return json_encode($response);
-        }
-    }
-
-    public function update_stock(Request $request, $slug){
-        $response = array(
-            "is_ok" => false,
-            "message" => "Request is not ajax"
-        );
-        if(!$request->ajax()){
-            return json_encode($response);
-        }
-        if(!$request->opt_0 || !$request->opt_1 || !$request->stock || !$slug){
-            return json_encode(array(
-                "is_ok" => false,
-                "message" => "Request can't be fulfilled because the data not valid!"
-            ));
-        }
-        // check data
-        $stock = Stock::find($slug);
-        if(!$stock){
-            return json_encode(array(
-                "is_ok" => false,
-                "message" => "Data not found!"
-            ));
-        }
-        $stock_from = $stock->stock;
-        // update
-        $stock->option_1 = $request->opt_0;
-        $stock->option_2 = $request->opt_1;
-        $stock->stock = $request->stock;
-        $stock->price = $request->price;
-        $stock->sales_price = $request->sales_price;
-        $stock->updated_by =Session::get('user')->id;
-
-        if($stock->save()){
-            // insert log
-            $log = new Log;
-            $log->reference_id = $stock->id;
-            $log->type = 'update';
-            $log->stock_from = $stock_from;
-            $log->stock_to = $stock->stock;
-            $log->created_by = Session::get('user')->id;
-            $log->save();
-
-            return json_encode(array(
-                "is_ok" => true,
-                "message" => 'Stock updated!'
-            ));
-        } else {
-            return json_encode(array(
-                "is_ok" => false,
-                "message" => "There is an error while saving the data!"
-            ));
-        }
-
-    }
-
-    public function delete_stock(Request $request, $slug){
-        $response = array(
-            "is_ok" => false,
-            "message" => "Request is not ajax"
-        );
-        if(!$request->ajax()){
-            return json_encode($response);
-        }
-        if(!$slug){
-            return json_encode(array(
-                "is_ok" => false,
-                "message" => "Request can't be fulfilled because the data not valid!"
-            ));
-        }
-        // check data
-        $stock = Stock::find($slug);
-        if(!$stock){
-            return json_encode(array(
-                "is_ok" => false,
-                "message" => "Data not found!"
-            ));
-        }
-        // update
-        $stock->deleted_by =Session::get('user')->id;
-        $stock_from = $stock->stock;
-        if($stock->save()){
-            $stock->delete();
-            // insert log
-            $log = new Log;
-            $log->reference_id = $stock->id;
-            $log->type = 'delete_stock';
-            $log->stock_from = $stock_from;
-            $log->stock_to = 0;
-            $log->created_by = Session::get('user')->id;
-            $log->save();
-            return json_encode(array(
-                "is_ok" => true,
-                "message" => 'Stock updated!'
-            ));
-        } else {
-            return json_encode(array(
-                "is_ok" => false,
-                "message" => "There is an error while saving the data!"
-            ));
-        }
-
-    }
-}
+ }
