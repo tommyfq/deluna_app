@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\User;
+use App\Models\Role;
 
 class UserController extends Controller {
     
@@ -99,6 +100,8 @@ class UserController extends Controller {
         $param['_title'] = 'Deluna | Add '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         $param['_page'] = $this->page;
+        $roles = Role::get();
+        $param['_roles'] = $roles;
         
         $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
@@ -113,6 +116,7 @@ class UserController extends Controller {
             'email' => 'required',
             'password' => 'required',
             'confirm_password' => 'required|same:password',
+            'role' => 'required',
             'is_active' => 'required'
         ];
         $custom = [
@@ -134,6 +138,7 @@ class UserController extends Controller {
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = md5($request->password);
+        $user->role_id = $request->role;
         $user->created_by = Session::get('user')->id;
         $user->is_active = $request->is_active === 'true' ? true: false;
         if($user->save()){
@@ -156,6 +161,8 @@ class UserController extends Controller {
             Session::flash('message.error', "Data not found!");
             return redirect()->route($this->page.'.index');
         }
+        $roles = Role::get();
+        $param['_roles'] = $roles;
         $param['data'] = $user;
         $viewtarget = "pages.".$this->page.".edit";
         $content = view($viewtarget, $param);
@@ -168,6 +175,7 @@ class UserController extends Controller {
         $rules = [
             'name' => 'required',
             'email' => 'required',
+            'role' => 'required',
             'is_active' => 'required',
         ];
         $custom = [
@@ -187,6 +195,7 @@ class UserController extends Controller {
         $array = [
             'name' => $request->name,
             'email' => $request->email,
+            'role_id' => $request->role,
             'is_active' => $request->is_active === 'true' ? true: false,
             'updated_by' => Session::get('user')->id,
         ];

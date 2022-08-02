@@ -36,6 +36,17 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="role">Role <span class="text-danger">*</span></label>
+                                <div class="col-lg-6">
+                                    <select class="form-control" id="role" name="role">
+                                        <option value=""> Select Role... </option>
+                                        @foreach($_roles as $val)
+                                            <option value="{{$val->id}}">{{$val->role_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="is_active">Active <span class="text-danger">*</span></label>
                                 <div class="col-lg-6">
                                     <label class="radio-inline mr-3">
@@ -77,6 +88,7 @@
                 "email": { required: !0, email: !0 },
                 "password": { required: !0, minlength: 6 },
                 "confirm_password": { required: !0, equalTo: "#password" },
+                "role": { required: !0 },
                 "is_active": { required: !0 }
             },
             messages: {
@@ -84,6 +96,7 @@
                 "email": "Please enter a valid email address",
                 "password": { required: "Please provide a password", minlength: "Your password must be at least 6 characters long" },
                 "confirm_password": { required: "Please provide a password", minlength: "Your password must be at least 6 characters long", equalTo: "Please enter the same password as above" },
+                "role": "Please choose the role",
                 "is_active": "Please choose the active status",
             },
         });
