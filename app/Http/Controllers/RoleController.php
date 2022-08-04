@@ -104,7 +104,13 @@ class RoleController extends Controller {
         foreach($list_menu as $val){
             $temp['menu_id'] = $val->id;
             $temp['menu_name'] = $val->menu;
-            $temp['action'] = MenuAction::where('menu_id', $val->id)->get(['id as action_id', 'action_name']);
+            $temp['action'] = [
+                'view' => $val->view,
+                'add' => $val->add,
+                'edit' => $val->edit,
+                'delete' => $val->delete,
+                'print' => $val->print,
+            ];
             array_push($arr, (object)$temp);
         }
         $param['_menu'] = (object)$arr;
@@ -144,16 +150,16 @@ class RoleController extends Controller {
             $role->save();
             // insert mapping role
             foreach($request->menu as $key => $val){
-                foreach($val as $cval){
-                    $arr = [
-                        'role_id' => $role->id,
-                        'menu_id' => $key,
-                        'action_id' => $cval
-                    ];
-                    $role_mapping = RoleMapping::firstOrNew($arr);
-                    $role_mapping->created_by = Session::get('user')->id;
-                    $role_mapping->save();
+                $arr = [
+                    'role_id' => $role->id,
+                    'menu_id' => $key,
+                ];
+                foreach($val as $ckey => $cval){
+                    $arr[$ckey] = $cval ? $cval : 0;
                 }
+                $role_mapping = RoleMapping::firstOrNew($arr);
+                $role_mapping->created_by = Session::get('user')->id;
+                $role_mapping->save();
             }
             DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been created!');
@@ -180,15 +186,19 @@ class RoleController extends Controller {
         foreach($list_menu as $val){
             $temp['menu_id'] = $val->id;
             $temp['menu_name'] = $val->menu;
-            $temp['action'] = MenuAction::where('menu_id', $val->id)->get(['id as action_id', 'action_name']);
-            foreach($temp['action'] as $cval){
-                $temps = RoleMapping::where(['role_id' => $slug, 'action_id' => $cval->action_id])->first();
-                if($temps){
-                    $cval->checked = true;
-                } else {
-                    $cval->checked = false;
-                }
-            }
+            $temp['action']  = [];
+            $check = RoleMapping::where('menu_id', $val->id)->where('role_id', $slug)->first();
+            if($check)
+                $temp['role_id'] = $check->role_id;
+            else
+                $temp['role_id'] = $slug;
+            $temp['action'] = [
+                'view' => ['menu' => $val->view, 'checked' => $check ? $check->view : 0],
+                'add' => ['menu' => $val->add, 'checked' => $check ? $check->add : 0],
+                'edit' => ['menu' => $val->edit, 'checked' => $check ? $check->edit : 0],
+                'delete' => ['menu' => $val->delete, 'checked' => $check ? $check->delete : 0],
+                'print' => ['menu' => $val->print, 'checked' => $check ? $check->print : 0],
+            ];
             array_push($arr, (object)$temp);
         }
         $param['_menu'] = (object)$arr;
@@ -232,15 +242,21 @@ class RoleController extends Controller {
             ];
             $role = Role::where('id', $slug)->update($array);
             foreach($request->menu as $key => $val){
-                foreach($val as $cval){
-                    $arr = [
-                        'role_id' => $slug,
-                        'menu_id' => $key,
-                        'action_id' => $cval
-                    ];
-                    $role_mapping = RoleMapping::firstOrNew($arr);
-                    $role_mapping->created_by = Session::get('user')->id;
-                    $role_mapping->save();
+                $arr = [
+                    'view' => isset($val['view']) ? ($val['view'] ? 1 : 0) : 0,
+                    'add' => isset($val['add']) ? ($val['add']? 1 : 0) : 0,
+                    'edit' => isset($val['edit']) ? ($val['edit'] ? 1 : 0) : 0,
+                    'delete' => isset($val['delete']) ? ($val['delete'] ? 1 : 0) : 0,
+                    'print' => isset($val['print']) ? ($val['print'] ? 1 : 0) : 0,
+                    'updated_by' => Session::get('user')->id
+                ];
+                $check = RoleMapping::where(['menu_id' => $key, 'role_id' => $slug])->first();
+                if($check)
+                    RoleMapping::where(['menu_id' => $key, 'role_id' => $slug])->update($arr);
+                else {
+                    $arr['menu_id'] = $key;
+                    $arr['role_id'] = $slug;
+                    RoleMapping::insert($arr);
                 }
             }
             DB::commit();

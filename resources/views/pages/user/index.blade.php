@@ -13,7 +13,9 @@
                             <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete User.</p>
                         </div>
                         <div class="col">
+                            @if($_role->add)
                             <a href="{{route('user.add')}}" class="btn mb-1 btn-primary float-right">Add User</a>
+                            @endif
                         </div>
                     </div>
                     <div class="row">

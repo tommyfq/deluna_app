@@ -49,6 +49,7 @@ a {
                                             <div class="nav flex-column nav-pills">
                                                 @foreach($_menu as $val)
                                                 <a href="#v-pills-{{$val->menu_id}}" data-toggle="pill" class="nav-link">{{$val->menu_name}}</a>
+                                                <input name="menu[{{$val->menu_id}}][role_id]" value="{{$val->role_id}}" hidden/>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -57,13 +58,17 @@ a {
                                                 @foreach($_menu as $val)
                                                 <div id="v-pills-{{$val->menu_id}}" class="tab-pane fade">
                                                     @if(sizeof($val->action)>0)
-                                                        @foreach($val->action as $cval)
-                                                        <div class="row">
-                                                            <label class=" col-form-label col-lg-2">
-                                                                <input type="checkbox" class="form-check-input" name="menu[{{$val->menu_id}}][]" value="{{$cval->action_id}}" {{$cval->checked ? 'checked' : ''}}>
-                                                                {{$cval->action_name}}
-                                                            </label>
-                                                        </div>
+                                                        @foreach($val->action as $kval => $cval)
+                                                            @if($cval['menu'] == 0)
+                                                                @php continue; @endphp
+                                                            @else
+                                                                <div class="row">
+                                                                    <label class=" col-form-label col-lg-2">
+                                                                        <input type="checkbox" class="form-check-input" name="menu[{{$val->menu_id}}][{{$kval}}]" {{$cval['checked'] ? 'checked value=1' : ''}}>
+                                                                        {{$kval}}
+                                                                    </label>
+                                                                </div>
+                                                            @endif
                                                         @endforeach
                                                     @else
                                                         <div class="row">

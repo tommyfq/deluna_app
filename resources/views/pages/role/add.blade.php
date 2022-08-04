@@ -56,13 +56,17 @@ a {
                                                 @foreach($_menu as $val)
                                                 <div id="v-pills-{{$val->menu_id}}" class="tab-pane fade">
                                                     @if(sizeof($val->action)>0)
-                                                        @foreach($val->action as $cval)
-                                                        <div class="row">
-                                                            <label class=" col-form-label col-lg-2">
-                                                                <input type="checkbox" class="form-check-input" name="menu[{{$val->menu_id}}][]" value="{{$cval->action_id}}">
-                                                                {{$cval->action_name}}
-                                                            </label>
-                                                        </div>
+                                                        @foreach($val->action as $kval => $cval)
+                                                            @if($cval == 0)
+                                                                @php continue; @endphp
+                                                            @else
+                                                                <div class="row">
+                                                                    <label class=" col-form-label col-lg-2">
+                                                                        <input type="checkbox" class="form-check-input" name="menu[{{$val->menu_id}}][{{$kval}}]" value="{{$cval}}">
+                                                                        {{$kval}}
+                                                                    </label>
+                                                                </div>
+                                                            @endif
                                                         @endforeach
                                                     @else
                                                         <div class="row">
