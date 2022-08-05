@@ -13,7 +13,9 @@
                             <p class="text-muted m-b-15 f-s-12">You can see the list of {{$_page}}s, add, edit and delete {{ucwords($_page)}}.</p>
                         </div>
                         <div class="col">
+                            @if($_role->add)
                             <a href="{{route($_page.'.add')}}" class="btn mb-1 btn-primary float-right">Add {{ucwords($_page)}}</a>
+                            @endif
                         </div>
                     </div>
                     <div class="row">

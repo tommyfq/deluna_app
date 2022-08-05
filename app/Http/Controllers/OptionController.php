@@ -22,6 +22,7 @@ class OptionController extends Controller {
         $param['_title'] = 'Deluna | '.ucwords($this->page).'s Menu';
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         $param['_page'] = $this->page;
+        $param['_role'] = $request->get('role');
 
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -41,6 +42,8 @@ class OptionController extends Controller {
                 3 =>'phone',
                 4 =>'is_active',
             );
+            
+            $role = $request->get('role');
 
             $totalData = OptionType::count();
             
@@ -77,15 +80,17 @@ class OptionController extends Controller {
                     '<i class="fa fa-check text-success">'
                     :
                     '<i class="fa fa-close text-danger">';
-                    
-                    $data[$i]['action'] = '
+                    $data[$i]['action'] = '';
+                    if($role->edit)
+                        $data[$i]['action'] .= '
                         <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
                             <i class="fa fa-pencil color-muted m-r-5"></i> 
-                        </a>
-                        <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-name="'.$data[$i]['name'].'" class="btn-delete" data-toggle="tooltip" data-placement="top" title="Close">
+                        </a>';
+                    if($role->delete)
+                        $data[$i]['action'] .= '<a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
                             <i class="fa fa-close color-danger"></i>
                         </a>
-                    ';
+                        ';
                 }
             }
 
