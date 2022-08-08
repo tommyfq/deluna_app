@@ -12,8 +12,13 @@ use App\Models\Role;
 class UserController extends Controller {
     
     private $page = 'user';
+    public $menu;
     public function __construct(){
-	}
+        $this->middleware(function ($request, $next) {
+            $this->menu = $request->get('menu');
+            return $next($request);
+        });
+    }
 
     public function index(Request $request) {
         $param = array();
@@ -21,6 +26,7 @@ class UserController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         $param['_page'] = $this->page;
         $param['_role'] = $request->get('role');
+        $param['_sidebar'] = $this->menu;
         
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -108,6 +114,7 @@ class UserController extends Controller {
         $param['_page'] = $this->page;
         $roles = Role::get();
         $param['_roles'] = $roles;
+        $param['_sidebar'] = $this->menu;
         
         $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
@@ -161,6 +168,7 @@ class UserController extends Controller {
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
         $param['_page'] = $this->page;
+        $param['_sidebar'] = $this->menu;
 
         $user = User::where(['id' => $slug, 'deleted_at' => NULL])->first();
         if(!$user){

@@ -14,9 +14,14 @@ use DB;
 
 class RoleController extends Controller {
 
-    private $page = 'role';
+    private $page = 'role';    
+    public $menu;
     public function __construct(){
-	}
+        $this->middleware(function ($request, $next) {
+            $this->menu = $request->get('menu');
+            return $next($request);
+        });
+    }
 
     public function index(Request $request) {
         $param = array();
@@ -24,6 +29,7 @@ class RoleController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         $param['_page'] = $this->page;
         $param['_role'] = $request->get('role');
+        $param['_sidebar'] = $this->menu;
 
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -106,6 +112,7 @@ class RoleController extends Controller {
         $param['_title'] = 'Deluna | Add '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         $param['_page'] = $this->page;
+        $param['_sidebar'] = $this->menu;
         $list_menu = Menu::get();
         foreach($list_menu as $val){
             $temp['menu_id'] = $val->id;
@@ -181,6 +188,7 @@ class RoleController extends Controller {
         $param = $arr = $temp = array();
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
+        $param['_sidebar'] = $this->menu;
 
         $role = Role::find($slug);
         if(!$role){

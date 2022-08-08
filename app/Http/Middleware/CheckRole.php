@@ -57,6 +57,7 @@ class CheckRole
             }
         }
         $request->attributes->add(['role' => $menu]);
+        $request->attributes->add(['menu' => session()->get('menu')]);
         return $next($request);
 
     }

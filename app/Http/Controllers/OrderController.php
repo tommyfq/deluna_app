@@ -14,14 +14,20 @@ use DB;
 class OrderController extends Controller {
 
     private $page = 'order';
+    public $menu;
     public function __construct(){
-	}
+        $this->middleware(function ($request, $next) {
+            $this->menu = $request->get('menu');
+            return $next($request);
+        });
+    }
 
     public function index(Request $request) {
         $param = array();
         $param['_title'] = 'Deluna | '.ucwords($this->page).' Menu';
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         $param['_page'] = $this->page;
+        $param['_sidebar'] = $this->menu;
         
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -105,6 +111,7 @@ class OrderController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         $param['_page'] = $this->page;
         $param['_sales_channel'] = SalesChannel::where('is_active',1)->get();
+        $param['_sidebar'] = $this->menu;
         // $category = Category::where(['is_active' => 1])->get();
         // $param['_category'] = $category;
         // $opt_type = OptionType::where(['is_active' => 1])->get();
@@ -183,6 +190,7 @@ class OrderController extends Controller {
         $param = array();
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
+        $param['_sidebar'] = $this->menu;
 
         $product = Product::leftJoin(with(new OptionType)->getTable().' as type1', function($join){
                                 $join->on('type1.id', with(new Product)->getTable().'.type_1');

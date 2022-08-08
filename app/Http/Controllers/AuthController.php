@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use DB;
 
 use App\Models\User;
+use App\Models\RoleMapping;
+use App\Models\Menu;
 
 class AuthController extends Controller {
 
@@ -53,7 +55,35 @@ class AuthController extends Controller {
             Session::flash('message.error', "Wrong username or password");
             return redirect()->back();
         }
+        // get menu parent
+        
+        $menu = Menu::whereNull('parent_id')
+                    ->orderBy('menu', 'ASC')
+                    ->get(['id', 'menu', 'slug', 'icon', 'view', 'add', 'edit', 'delete', 'print']);
+        // get menu child
+        $arr = $temp = array();
+        foreach($menu as $val){
+            $temp['id'] = $val->id;
+            $temp['menu'] = $val->menu;
+            $temp['slug'] = $val->slug;
+            $temp['icon'] = $val->icon;
+            $temp['view'] = $val->view;
+            $temp['add'] = $val->add;
+            $temp['edit'] = $val->edit;
+            $temp['delete'] = $val->delete;
+            $temp['print'] = $val->print;
+            $temp['submenu'] = RoleMapping::leftJoin(with(new Menu)->getTable(). ' as m', function($join){
+                                                $join->on('m.id', with(new RoleMapping)->getTable().'.menu_id');
+                                            })
+                                            ->where('role_id', $check->role_id)
+                                            ->where('parent_id', $val->id)
+                                            ->where( with(new RoleMapping)->getTable().'.view', '!=', 0)
+                                            ->orderBy('m.menu', 'ASC')
+                                            ->get(['m.id', 'm.menu', 'm.slug', 'm.icon', with(new RoleMapping)->getTable().'.view', with(new RoleMapping)->getTable().'.add', with(new RoleMapping)->getTable().'.edit', with(new RoleMapping)->getTable().'.delete', with(new RoleMapping)->getTable().'.print']);
+            array_push($arr, (object)$temp);
+        }
         Session::put('user', $check);
+        Session::put('menu', $arr);
         Session::flash('message.success', "Welcome, ".$check->name."!");
         return redirect()->route('dashboard.index');
     }

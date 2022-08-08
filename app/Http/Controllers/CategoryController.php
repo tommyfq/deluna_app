@@ -11,8 +11,13 @@ use App\Models\Category;
 class CategoryController extends Controller {
 
     private $page = 'category';
+    public $menu;
     public function __construct(){
-	}
+        $this->middleware(function ($request, $next) {
+            $this->menu = $request->get('menu');
+            return $next($request);
+        });
+    }
 
     public function index(Request $request) {
         $param = array();
@@ -20,6 +25,7 @@ class CategoryController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         $param['_page'] = $this->page;
         $param['_role'] = $request->get('role');
+        $param['_sidebar'] = $this->menu;
         
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -106,6 +112,7 @@ class CategoryController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         $param['type'] = Category::TYPE;
         $param['_page'] = $this->page;
+        $param['_sidebar'] = $this->menu;
         
         $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
@@ -152,6 +159,7 @@ class CategoryController extends Controller {
         $param = array();
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
+        $param['_sidebar'] = $this->menu;
 
         $category = Category::where(['id' => $slug, 'deleted_at' => NULL])->first();
         if(!$category){

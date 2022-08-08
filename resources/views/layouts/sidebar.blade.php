@@ -1,42 +1,26 @@
 <div class="nk-sidebar">
     <div class="nk-nav-scroll">
         <ul class="metismenu" id="menu">
-            {{-- simple line icon --}}
-            <li class="nav-label">Dashboard</li>
-            <li>
-                <a href="{{route('dashboard.index')}}" aria-expanded="false">
-                    <i class="icon-speedometer menu-icon"></i><span class="nav-text">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-label">Master Data</li>
-            <li>
-                <a class="has-arrow" href="javascript:void()" aria-expanded="false">
-                    <i class="icon-docs menu-icon"></i><span class="nav-text">Master data</span>
-                </a>
-                <ul aria-expanded="false">
-                    <li><a href="{{route('user.index')}}">User</a></li>
-                </ul>
-                <ul aria-expanded="false">
-                    <li><a href="{{route('vendor.index')}}">Vendor</a></li>
-                </ul>
-                <ul aria-expanded="false">
-                    <li><a href="{{route('category.index')}}">Category</a></li>
-                </ul>
-                <ul aria-expanded="false">
-                    <li><a href="{{route('option.index')}}">Option</a></li>
-                </ul>
-                <ul aria-expanded="false">
-                    <li><a href="{{route('product.index')}}">Product</a></li>
-                </ul>
-                <ul aria-expanded="false">
-                    <li><a href="{{route('role.index')}}">Roles</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="{{route('order.index')}}" aria-expanded="false">
-                    <i class="icon-basket menu-icon"></i><span class="nav-text">Order</span>
-                </a>
-            </li>
+            @if($_sidebar)
+                @foreach($_sidebar as $val)
+                    <li>
+                        @if($val->submenu && count($val->submenu)>0)
+                        <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                            <i class="{{$val->icon}} menu-icon"></i><span class="nav-text">{{$val->menu}}</span>
+                        </a>
+                        @foreach($val->submenu as $cval)
+                        <ul aria-expanded="false">
+                            <li><a href="{{url($cval->slug)}}">{{$cval->menu}}</a></li>
+                        </ul>
+                        @endforeach
+                        @else
+                        <a href="{{url($val->slug)}}" aria-expanded="false">
+                            <i class="{{$val->icon}} menu-icon"></i><span class="nav-text">{{$val->menu}}</span>
+                        </a>
+                        @endif
+                    </li>
+                @endforeach
+            @endif
         </ul>
     </div>
 </div>

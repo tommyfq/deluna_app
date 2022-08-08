@@ -12,7 +12,13 @@ use DataTables;
 class VendorController extends Controller {
 
     private $page = 'vendor';
-    public function __construct(){}
+    public $menu;
+    public function __construct(){
+        $this->middleware(function ($request, $next) {
+            $this->menu = $request->get('menu');
+            return $next($request);
+        });
+    }
 
     public function index(Request $request)
     {
@@ -21,6 +27,7 @@ class VendorController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index')];
         $param['_page'] = $this->page;
         $param['_role'] = $request->get('role');
+        $param['_sidebar'] = $this->menu;
 
         $viewtarget = "pages.".$this->page.".index";
         $content = view($viewtarget, $param);
@@ -113,6 +120,7 @@ class VendorController extends Controller {
         $param['_title'] = 'Deluna | Add '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Add' => route($this->page.'.add')];
         $param['_page'] = $this->page;
+        $param['_sidebar'] = $this->menu;
 
         $viewtarget = "pages.".$this->page.".add";
         $content = view($viewtarget, $param);
@@ -167,6 +175,7 @@ class VendorController extends Controller {
         $param['_title'] = 'Deluna | Edit User';
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
         $param['_page'] = $this->page;
+        $param['_sidebar'] = $this->menu;
 
         $selected = Vendor::where('id', $slug)->first();
         if(!$selected){
