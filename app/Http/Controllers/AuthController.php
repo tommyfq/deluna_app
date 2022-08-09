@@ -10,6 +10,7 @@ use DB;
 use App\Models\User;
 use App\Models\RoleMapping;
 use App\Models\Menu;
+use App\Models\Role;
 
 class AuthController extends Controller {
 
@@ -46,7 +47,10 @@ class AuthController extends Controller {
             return redirect()->back()->withErrors($validator);
         }
         // check user
-        $check = User::where('email', $request->email)->first();
+        $check = User::leftJoin(with(new Role)->getTable().' as r', function($join){
+                        $join->on('r.id', with(new User)->getTable().'.role_id');
+                    })
+                    ->where('email', $request->email)->first();
         if(!$check){
             Session::flash('message.error', "Account doesn't exists!");
             return redirect()->back();

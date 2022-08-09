@@ -14,7 +14,7 @@
                         </ul>
                         @endforeach
                         @else
-                        <a href="{{url($val->slug)}}" aria-expanded="false">
+                        <a href="{{!is_null($val->slug) ? url($val->slug) : 'javascript:void()'}}" aria-expanded="false">
                             <i class="{{$val->icon}} menu-icon"></i><span class="nav-text">{{$val->menu}}</span>
                         </a>
                         @endif

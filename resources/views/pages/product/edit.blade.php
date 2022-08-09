@@ -101,10 +101,10 @@
                                         </div>
                                         @endif
                                         <div class="col-lg-2">
-                                            <input type="number" min=0 class="form-control option-price" placeholder="Enter Price" value="{{$_stock[$i]->price}}" required>
+                                            <input type="number" min=0 class="form-control option-price" placeholder="Enter Price" value="{{$_stock[$i]->price}}" {{strtolower($_auth->role_name) == 'super admin' ? 'required' : 'readonly'}}>
                                         </div>
                                         <div class="col-lg-2">
-                                            <input type="number" min=0 class="form-control option-sales-price" placeholder="Enter Sales Price" value="{{$_stock[$i]->sales_price}}" required>
+                                            <input type="number" min=0 class="form-control option-sales-price" placeholder="Enter Sales Price" value="{{$_stock[$i]->sales_price}}" {{strtolower($_auth->role_name) == 'super admin' ? 'required' : 'readonly'}}>
                                         </div>
                                         <div class="col-lg-2">
                                             <input type="number" min=0 class="form-control option-stock" placeholder="Enter Stock" value="{{$_stock[$i]->stock}}" required>

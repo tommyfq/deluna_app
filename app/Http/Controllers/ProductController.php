@@ -208,6 +208,7 @@ class ProductController extends Controller {
         $param['_title'] = 'Deluna | Edit '.ucwords($this->page);
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
         $param['_sidebar'] = $this->menu;
+        $param['_auth'] = session()->get('user');
 
         $product = Product::leftJoin(with(new OptionType)->getTable().' as type1', function($join){
                                 $join->on('type1.id', with(new Product)->getTable().'.type_1');
