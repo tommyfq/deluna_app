@@ -11,6 +11,7 @@ use App\Http\Controllers\OptionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\LogStockController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -91,6 +92,10 @@ Route::middleware('check.user')->group(function(){
             Route::post('get-options', [RoleController::class, 'get_options'])->name('role.getoptions');
             Route::put('/update-stock/{slug}', [RoleController::class, 'update_stock'])->name('role.update-stock');
             Route::delete('/delete-stock/{slug}', [RoleController::class, 'delete_stock'])->name('role.delete-stock');
+        });
+        Route::prefix('log-stock')->group(function(){
+            Route::get('/', [LogStockController::class, 'index'])->name('log-stock.index');
+            Route::get('/list', [LogStockController::class, 'get'])->name('log-stock.list');
         });
         Route::prefix('order')->group(function(){
             Route::get('/', [OrderController::class, 'index'])->name('order.index');
