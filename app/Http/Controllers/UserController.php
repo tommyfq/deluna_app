@@ -169,6 +169,7 @@ class UserController extends Controller {
         $param['_breadcrumbs'] = ['Dashboard' => route('dashboard.index'), ucwords($this->page) => route($this->page.'.index'), 'Edit' => route($this->page.'.edit',[$slug])];
         $param['_page'] = $this->page;
         $param['_sidebar'] = $this->menu;
+        $param['_auth'] = session()->get('user');
 
         $user = User::where(['id' => $slug, 'deleted_at' => NULL])->first();
         if(!$user){

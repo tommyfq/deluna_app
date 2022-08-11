@@ -10,6 +10,8 @@ use App\Models\Product;
 use App\Models\Log;
 use App\Models\Stock;
 use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\Option;
 use DB;
 use DataTables;
 
@@ -62,16 +64,29 @@ class LogStockController extends Controller {
             $models =  Log::leftJoin(with(new Stock)->getTable().' as s', function($join){
                                 $join->on('s.id', with(new Log)->getTable().'.reference_id');
                             })
-                            ->leftJoin(with(new Product)->getTable().' as p', function($join){
-                                $join->on('p.id', 's.product_id');
+                            ->leftJoin(with(new Option)->getTable().' as opt1', function($join){
+                                $join->on('s.option_1', 'opt1.id');
+                            })
+                            ->leftJoin(with(new Option)->getTable().' as opt2', function($join){
+                                $join->on('s.option_2', 'opt2.id');
                             })
                             ->leftJoin(with(new Order)->getTable().' as o', function($join){
                                 $join->on('o.id', with(new Log)->getTable().'.order_id');
+                            })
+                            ->leftJoin(with(new OrderDetail)->getTable().' as od', function($join){
+                                $join->on('o.id', 'od.order_header_id');
+                            })
+                            ->leftJoin(with(new Product)->getTable().' as p', function($join){
+                                $join->on('p.id', 's.product_id');
+                                $join->orOn('od.product_id', 'p.id');
                             });
             if(!empty($search)){
                 $models->where(function($query) use ($search){
                     $query->where('p.name','LIKE',"%{$search}%")
-                        ->orWhere('o.order_no', 'LIKE',"%{$search}%");
+                        ->orWhere('o.order_no', 'LIKE',"%{$search}%")
+                        ->orWhere('p.name', 'LIKE',"%{$search}%")
+                        ->orWhere('opt1.name', 'LIKE',"%{$search}%")
+                        ->orWhere('opt2.name', 'LIKE',"%{$search}%");
                 });
 
                 $totalFiltered = Log::leftJoin(with(new Stock)->getTable().' as s', function($join){
@@ -93,7 +108,7 @@ class LogStockController extends Controller {
             $models = $models->offset($start)
                     ->limit($limit)
                     ->orderBy($order,$dir)
-                    ->get([with(new Log)->getTable().'.*', DB::raw('CASE WHEN o.order_no IS NULL THEN p.name ELSE o.order_no END reference')]);
+                    ->get([with(new Log)->getTable().'.*', 'o.order_no', 'p.name as product', 'opt1.name as option_1', 'opt2.name as option_2']);
 
             $data = $models->toArray();
 

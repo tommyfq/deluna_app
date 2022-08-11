@@ -20,9 +20,14 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">Reference</th>
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Option 1</th>
+                                            <th scope="col">Option 2</th>
                                             <th scope="col">Type</th>
                                             <th scope="col">Stock From</th>
                                             <th scope="col">Stock To</th>
+                                            <th scope="col">Created At</th>
+                                            <th scope="col">Created By</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -47,10 +52,15 @@
           serverSide: true,
           ajax: "{{ route($_page.'.list') }}",
           columns: [
-              {data: 'reference', name: 'reference'},
+              {data: 'order_no', defaultContent: 'Stock', name: 'order_no'},
+              {data: 'product', defaultContent: '-', name: 'product'},
+              {data: 'option_1' , defaultContent: '-', name: 'option_1'},
+              {data: 'option_2', defaultContent: '-', name: 'option_2'},
               {data: 'type', name: 'type'},
-              {data: 'stock_from', name: 'stock_from'},
-              {data: 'stock_to', name: 'stock_to'},
+              {data: 'stock_from', defaultContent: 0, name: 'stock_from'},
+              {data: 'stock_to', defaultContent: 0, name: 'stock_to'},
+              {data: 'created_at', name: 'created_at'},
+              {data: 'created_by', name: 'created_by'},
           ],
           order: [
             [0, 'desc']

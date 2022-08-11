@@ -22,6 +22,7 @@
                                     <input type="email" class="form-control" id="email" name="email" value="{{$data->email}}" placeholder="Enter your Email">
                                 </div>
                             </div>
+                            @if(strtolower($_auth->role_name) == 'super admin')
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="password">Password <span class="text-danger">*</span>
                                 </label>
@@ -29,6 +30,7 @@
                                     <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
                                 </div>
                             </div>
+                            @endif
                             <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="role">Role <span class="text-danger">*</span></label>
                                 <div class="col-lg-6">
