@@ -22,7 +22,6 @@
                                 <table class="table table-bordered verticle-middle yajra-datatable">
                                     <thead>
                                         <tr>
-                                            <th scope="col">Action</th>
                                             <th scope="col">Order Number</th>
                                             <th scope="col">Status</th>
                                             <th scope="col">Total price</th>
@@ -53,14 +52,9 @@
         var table = $('.yajra-datatable').DataTable({
           processing: true,
           serverSide: true,
+          order:[[0,'desc']],
           ajax: "{{ route($_page.'.list') }}",
           columns: [
-            {
-                data: 'action', 
-                name: 'action', 
-                orderable: false, 
-                searchable: false
-            },
             {data: 'order_no', name: 'order_no'},
             {data: 'status', name: 'status'},
             {data: 'total_price', name: 'total_price'},

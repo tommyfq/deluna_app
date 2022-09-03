@@ -47,7 +47,7 @@ class AuthController extends Controller {
             return redirect()->back()->withErrors($validator);
         }
         // check user
-        $check = User::leftJoin(with(new Role)->getTable().' as r', function($join){
+        $check = User::select('ms_users.id','ms_users.name','ms_users.role_id','ms_users.email','r.role_name','ms_users.is_active','ms_users.password')->leftJoin(with(new Role)->getTable().' as r', function($join){
                         $join->on('r.id', with(new User)->getTable().'.role_id');
                     })
                     ->where('email', $request->email)->first();

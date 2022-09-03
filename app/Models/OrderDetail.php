@@ -18,6 +18,7 @@ class OrderDetail extends Model
         'product_option_id',
         'quantity',
         'price',
+        'base_price',
         'notes',
         'created_at',
         'updated_at',
@@ -29,6 +30,18 @@ class OrderDetail extends Model
     const UPDATED_AT = 'updated_at';
 
     public function sales(){
-        $this->belongsTo(SalesChannel::class);
+        return $this->belongsTo(SalesChannel::class);
+    }
+
+    public function order(){
+        return $this->belongsTo(Order::class);
+    }
+
+    public function product(){
+        return $this->belongsTo(Product::class);
+    }
+
+    public function stock_option(){
+        return $this->belongsTo(Stock::class,'product_option_id','id');
     }
 }

@@ -102,8 +102,10 @@ Route::middleware('check.user')->group(function(){
             Route::get('/list', [OrderController::class, 'get'])->name('order.list');
             Route::get('add', [OrderController::class, 'add'])->name('order.add');
             Route::post('/', [OrderController::class, 'store'])->name('order.store');
-            // Route::get('/edit/{slug}', [VendorController::class, 'edit'])->name('vendor.edit');
-            // Route::put('/{slug}', [VendorController::class, 'update'])->name('vendor.update');
+            Route::post('/get-option-list',[OrderController::class, 'get_option_list'])->name('order.get-option-list');
+            Route::post('/get-stock',[OrderController::class, 'get_stock'])->name('order.get-stock');
+            Route::get('/edit/{slug}', [OrderController::class, 'edit'])->name('order.edit');
+            Route::put('/{slug}', [OrderController::class, 'update'])->name('order.update');
             // Route::get('/delete/{slug}', [VendorController::class, 'delete'])->name('vendor.delete');
         });
     });

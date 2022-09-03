@@ -14,55 +14,69 @@
                 <div class="card-body">
                     @include('_includes.alert')
                     <div class="form-validation">
-                        <form id="form-order" class="form-valide" action="{{route($_page.'.store')}}" method="post">
+                        <form id="form-order" class="form-valide" action="{{route($_page.'.update',[$_order->id])}}" method="post">
+                            @method('put')
                             @csrf
                             <div class="form-group row">
-                                <div class="col-lg-12 ml-auto text-right">
-                                    <button id="btn-submit" type="submit" class="btn btn-primary">Submit</button>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label">Customer Name <span class="text-danger">*</span>
-                                </label>
-                                <div class="col-lg-6">
-                                    <input type="text" class="form-control" name="customer_name" placeholder="Enter your product name" required>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label">Customer Phone <span class="text-danger">*</span></label>
-                                <div class="col-lg-6">
-                                    <input type="text" class="form-control" name="customer_phone" placeholder="Enter your product description" value="{{old('customer_phone')}}" required>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label">Customer Email <span class="text-danger">*</span></label>
-                                <div class="col-lg-6">
-                                    <input type="email" class="form-control" name="customer_email" placeholder="Enter your product description" value="{{old('customer_email')}}" required>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label">Address <span class="text-danger">*</span></label>
-                                <div class="col-lg-6">
-                                    <textarea class="form-control" id="address" placeholder="Enter Address" name="address" required>{{old('address')}}</textarea>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label">Sales Channel <span class="text-danger">*</span></label>
-                                <div class="col-lg-6">
-                                    <select class="form-control" name="sales_channel_id" required>
-                                        <option value="">Select Sales Channel</option>
-                                        @if($_sales_channel)
-                                            @foreach($_sales_channel as $val)
-                                                <option value="{{$val->id}}">{{$val->name}}</option>
+                                <div class="col-lg-3 offset-lg-9 ml-auto text-right d-inline">
+                                    @if(count($_status) > 0)
+                                    <select class="form-control d-inline" style="width:250px" name="status" required>
+                                        @if($_status)
+                                            @foreach($_status as $key => $value)
+                                                <option value="{{$key}}">{{str_replace("_"," ",strtoupper($key))}}</option>
                                             @endforeach
                                         @endif
                                     </select>
+                                    <button id="btn-submit" type="submit" class="btn btn-primary" style="margin-bottom:7px">Submit</button>
+                                    @endif
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-lg-4 col-form-label">Sales Channel Notes</label>
+                                <label class="col-lg-4 col-form-label">Order Number</label>
                                 <div class="col-lg-6">
-                                    <textarea class="form-control" name="sales_channel_notes" placeholder="Enter Sales Channel Notes">{{old('sales_channel_notes')}}</textarea>
+                                    <b>{{str_replace("_"," ",strtoupper($_order->order_no))}}</b>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Order Status</label>
+                                <div class="col-lg-6">
+                                    {{str_replace("_"," ",strtoupper($_order->status))}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Customer Name</label>
+                                <div class="col-lg-6">
+                                    {{$_order->customer_name}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Customer Phone</label>
+                                <div class="col-lg-6">
+                                    {{$_order->customer_phone}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Customer Email</label>
+                                <div class="col-lg-6">
+                                    {{$_order->customer_email}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Address</label>
+                                <div class="col-lg-6">
+                                    {{$_order->address}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Sales Channel</label>
+                                <div class="col-lg-6">
+                                    {{$_order->sales->name}}
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label">Notes</label>
+                                <div class="col-lg-6">
+                                    <textarea class="form-control" name="sales_channel_notes" placeholder="Enter Notes">{{$_order->sales_channel_notes}}</textarea>
                                 </div>
                             </div>
                             <hr>
@@ -75,58 +89,68 @@
                                             <th style="width:10%">Qty</th>
                                             <th style="width:15%">Price</th>
                                             <th style="width:15%">Subtotal</th>
-                                            <th style="width:10%">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody class="product-detail-container">
+                                        @foreach($_order->order_detail as $detail)
                                         <tr class="product-detail-row">
                                             <td>
-                                                <select style="width:100%" class="form-control product-select2" name="products[]" required>
-                                                    <option value="">Please Select Product</option>
-                                                    @foreach($_products as $prod)
-                                                        <option value="{{$prod->id}}">{{$prod->name}}</option>
-                                                    @endforeach
-                                                </select>
+                                                {{$detail->product->name}}
                                             </td> 
                                             <td class="option-container">
-                                                Please Select the Product First
-                                            </td>
-                                            <td class="container-product-stock">
-                                                <input type="number" name="quantity[]" class="form-control product-detail-qty" required min="1" value="1"/>
-                                                <input type="hidden" name="stock_id[]" class="hidden-stock-id" />
-                                                <label class="product-detall-stock-info">Stock : </label>
-                                                <label class="text-danger alert-stock"></label>
-                                            </td>
-                                            <td class="product-detail-price">
-                                                -
-                                            </td>
-                                            <td class="product-detail-subtotal">
-                                                -
-                                            </td>
-                                            <td>
+                                                {{$detail->stock_option->option1->name ?? '-'}}
+                                                
+                                                @if(isset($detail->stock_option->option2->name))
+                                                    <br>
+                                                    {{$detail->stock_option->option2->name}}
+                                                @endif
                                                 
                                             </td>
-                                        </tr>
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td class="tfoot-info">
-                                                <button id="btn-add" type="button" class="btn btn-info btn-block">+ Add Product</button>
+                                            <td class="container-product-stock">
+                                                {{$detail->quantity}}
+                                            </td>
+                                            <td class="product-detail-price">
+                                                {{number_format($detail->price,0,',','.')}}
+                                            </td>
+                                            <td class="product-detail-subtotal">
+                                                {{number_format($detail->quantity*$detail->price,0,',','.')}}
                                             </td>
                                         </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot>
                                         <tr >
                                             <td colspan="4">Discount</td>
-                                            <td><input id="order-discount" type="number" class="form-control" name="discount" value="0" /></td>
+                                            <td>{{number_format($_order->discount,0,',','.')}}</td>
                                         </tr>
                                         <tr>
                                             <td class="tfoot-info"colspan="4">Total</td>
-                                            <td class="tfoot-info order-total">-</td>
+                                            <td class="tfoot-info order-total">{{number_format($_order->grand_total,0,',','.')}}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
-                            
                         </form>
+                    </div>
+                    <div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date time</th>
+                                    <th>Status</th>
+                                    <th>Changes By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($_order->order_log as $log)
+                                <tr>
+                                    <td>{{$log->created_at}}</td>
+                                    <td>{{$log->status}}</td>
+                                    <td>{{$log->user->name}}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -143,40 +167,6 @@
             var total = 0;
             $('.product-select2').select2();
 
-            $('#btn-add').on('click',function(){
-                productCount++;
-                $('.product-detail-container').append(`
-                <tr class="product-detail-row">
-                    <td>
-                        <select style="width:100%" class="form-control product-select2" name="products[]" required>
-                            <option value="">Please Select Product</option>
-                            @foreach($_products as $prod)
-                                <option value="{{$prod->id}}">{{$prod->name}}</option>
-                            @endforeach
-                        </select>
-                    </td> 
-                    <td class="option-container">
-                        Please Select the Product First
-                    </td>
-                    <td class="container-product-stock">
-                        <input type="number" name="quantity[]" class="form-control product-detail-qty" required min="1" value="1"/>
-                        <input type="hidden" name="stock_id[]" class="hidden-stock-id" />
-                        <label class="product-detall-stock-info">Stock : </label>
-                        <label class="text-danger alert-stock"></label>
-                    </td>
-                    <td class="product-detail-price">
-                        -
-                    </td>
-                    <td class="product-detail-subtotal">
-                        -
-                    </td>
-                    <td><button type="button" class="btn btn-danger btn-del-option"> <i class="fa fa-trash"></i></button></td>
-                </tr>
-                `
-                );
-                $('.product-select2').select2();
-            });
-
             $(document).on('click','#btn-submit',function(e){
                 let isFormValid = $('#form-order')[0].checkValidity();
                 if(!isFormValid){
@@ -186,12 +176,11 @@
                 }
 
                 var form = $('#form-order').serializeArray();
+                var url = $('#form-order').attr('action');
 
-                var url = "{{URL::to('/')}}";
-                    url = url+"/order";
                     $.ajax({
                         url : url,
-                        type: "POST",
+                        type: "PUT",
                         data : form,
                         success: function(data, textStatus, jqXHR)
                         {
@@ -202,10 +191,9 @@
                                     type: 'success',
                                     title: result.message,
                                     confirmButtonText: 'Close',
-                                    allowOutsideClick: false
                                 }).then((result) => {
                                     if (result.value) {
-                                        window.location = url;
+                                        location.reload();
                                     }
                                 })
                             }else{

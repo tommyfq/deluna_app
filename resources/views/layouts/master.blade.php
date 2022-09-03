@@ -15,7 +15,7 @@
                         <b class="logo-abbr"><img src="{{asset('images/logo.png')}}" alt=""> </b>
                         <span class="logo-compact"><img src="{{asset('images/logo-compact.png')}}" alt=""></span>
                         <span class="brand-title">
-                            <img src="{{asset('images/logo-text.png')}}" alt="">
+                            <h1 class="white">DELUNA</h1>
                         </span>
                     </a>
                 </div>

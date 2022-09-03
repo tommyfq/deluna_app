@@ -29,4 +29,12 @@ class Stock extends Model
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
+
+    public function option1(){
+        return $this->belongsTo(Option::class,'option_1','id');
+    }
+
+    public function option2(){
+        return $this->belongsTo(Option::class,'option_2','id');
+    }
 }
