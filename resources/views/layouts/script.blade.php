@@ -25,5 +25,9 @@
 
 
     })(jQuery);
+    $(document).ready(function(){
+        $('.submenu.active').closest('.parentmenu').addClass('active');
+        $('#menu li.active ul').addClass('collapse in');
+     })
 </script>
 @stack('scripts')

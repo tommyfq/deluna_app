@@ -241,8 +241,7 @@
                 // your code
                 var productSelect2 = $(this);
                 var id = this.value;
-                var url = "{{URL::to('/')}}";
-                url = url+"/order/get-option-list";
+                var url = "{{route('order.get-option-list')}}";
                 $.ajax({
                     url : url,
                     type: "POST",
@@ -329,8 +328,7 @@
                         </select>
                     `);
 
-                    var url = "{{URL::to('/')}}";
-                    url = url+"/order/get-stock";
+                    var url = "{{route('order.get-stock')}}";
                     $.ajax({
                         url : url,
                         type: "POST",
@@ -364,8 +362,7 @@
                     });
                     
                 }else{
-                    var url = "{{URL::to('/')}}";
-                    url = url+"/order/get-option-list";
+                    var url = "{{route('order.get-option-list')}}";
                     $.ajax({
                         url : url,
                         type: "POST",
@@ -449,8 +446,7 @@
                 updateSubTotal(subTotalElement,subTotal)
                 calculateTotal();
 
-                var url = "{{URL::to('/')}}";
-                url = url+"/order/get-stock";
+                var url = "{{route('order.get-stock')}}";
                 $.ajax({
                     url : url,
                     type: "POST",
