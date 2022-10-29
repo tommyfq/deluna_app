@@ -11,7 +11,7 @@
         </div>
         <div class="header-right">
             <ul class="clearfix">
-                <li class="icons dropdown"><a href="javascript:void(0)" data-toggle="dropdown">
+                {{-- <li class="icons dropdown"><a href="javascript:void(0)" data-toggle="dropdown">
                         <i class="mdi mdi-email-outline"></i>
                         <span class="badge gradient-1 badge-pill badge-primary">3</span>
                     </a>
@@ -131,7 +131,7 @@
                             </ul>
                         </div>
                     </div>
-                </li>
+                </li> --}}
                 <li class="icons dropdown">
                     <div class="user-img c-pointer position-relative"   data-toggle="dropdown">
                         <span class="activity active"></span>
@@ -140,7 +140,7 @@
                     <div class="drop-down dropdown-profile   dropdown-menu">
                         <div class="dropdown-content-body">
                             <ul>
-                                <li>
+                                {{-- <li>
                                     <a href="app-profile.html"><i class="icon-user"></i> <span>Profile</span></a>
                                 </li>
                                 <li>
@@ -150,7 +150,7 @@
                                 <hr class="my-2">
                                 <li>
                                     <a href="page-lock.html"><i class="icon-lock"></i> <span>Lock Screen</span></a>
-                                </li>
+                                </li> --}}
                                 <li><a href="{{route('logout.index')}}"><i class="icon-key"></i> <span>Logout</span></a></li>
                             </ul>
                         </div>
