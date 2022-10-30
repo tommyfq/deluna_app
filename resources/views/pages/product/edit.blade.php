@@ -25,10 +25,24 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="code">Product Code <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" id="code" name="code" value="{{old('code') ? old('code') : $data->code}}" placeholder="Enter your product code" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="weight">Product Weight <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" id="weight" name="weight" value="{{old('weight') ? old('weight') : $data->weight}}" placeholder="Enter your product weight in grams / pcs" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="description">Product Description
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="description" name="description" value="{{old('description') ? old('description') : $data->description}}" placeholder="Enter your product description" >
+                                    <textarea rows="5" class="form-control" id="description" name="description" placeholder="Enter your product description" >{{old('description') ? old('description') : $data->description}}</textarea>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -83,7 +97,7 @@
                                     @for($i=0; $i<count($_stock); $i++)
                                     <div class="form-group row option-row" id="row_{{$_stock[$i]->id}}" data-id="{{$_stock[$i]->id}}">
                                         <div class="col-lg-2">
-                                            <select class="form-control option-0" required>
+                                            <select class="form-control option-0" {{strtolower($_auth->role_name) == 'super admin' ? 'disabled' : 'readonly'}}>
                                                 <option value="">Select Data</option>
                                                 @foreach($_option_1 as $val)
                                                 <option value="{{$val->id}}" {{($_stock[$i]->option_1 == $val->id ? 'selected data-name='.$val->name : '')}}>{{$val->name}}</option>
@@ -92,7 +106,7 @@
                                         </div>
                                         @if(count($_option_2) > 0)
                                         <div class="col-lg-2">
-                                            <select class="form-control option-1">
+                                            <select class="form-control option-1" {{strtolower($_auth->role_name) == 'super admin' ? 'disabled' : 'readonly'}}>
                                                 <option value="">Select Data</option>
                                                 @foreach($_option_2 as $val)
                                                 <option value="{{$val->id}}" {{($_stock[$i]->option_2 == $val->id ? 'selected data-name='.$val->name : '')}}>{{$val->name}}</option>
@@ -101,13 +115,13 @@
                                         </div>
                                         @endif
                                         <div class="col-lg-2">
-                                            <input type="number" min=0 class="form-control option-price" placeholder="Enter Price" value="{{$_stock[$i]->price}}" {{strtolower($_auth->role_name) == 'super admin' ? 'required' : 'readonly'}}>
+                                            <input type="text" class="form-control option-price" placeholder="Enter Price" value="{{number_format($_stock[$i]->price, '0', '.', ',')}}" {{strtolower($_auth->role_name) == 'super admin' ? 'disabled' : 'readonly'}}>
                                         </div>
                                         <div class="col-lg-2">
-                                            <input type="number" min=0 class="form-control option-sales-price" placeholder="Enter Sales Price" value="{{$_stock[$i]->sales_price}}" {{strtolower($_auth->role_name) == 'super admin' ? 'required' : 'readonly'}}>
+                                            <input type="text" class="form-control option-sales-price" placeholder="Enter Sales Price" value="{{number_format($_stock[$i]->sales_price, '0', '.', ',')}}" {{strtolower($_auth->role_name) == 'super admin' ? 'disabled' : 'readonly'}}>
                                         </div>
                                         <div class="col-lg-2">
-                                            <input type="number" min=0 class="form-control option-stock" placeholder="Enter Stock" value="{{$_stock[$i]->stock}}" required>
+                                            <input type="number" min=0 class="form-control option-stock" placeholder="Enter Stock" value="{{$_stock[$i]->stock}}" {{strtolower($_auth->role_name) == 'super admin' ? 'disabled' : 'readonly'}}>
                                         </div>
                                         <div class="col-lg-2 btn-container">
                                             <button type="button" class="btn btn-info btn-edit"><i class="fa fa-pencil"></i></button>
@@ -179,6 +193,10 @@
                 $(this).addClass('d-none');
                 $(this).closest('.btn-container').find('.btn-save-edit').addClass('d-none');
                 $(this).closest('.btn-container').find('.btn-edit').removeClass('d-none');
+                $('.container-opt').find('input').removeAttr('required');
+                $('.container-opt').find('input').attr('disabled', 'disabled');
+                $('.container-opt').find('select').removeAttr('required');
+                $('.container-opt').find('select').attr('disabled', 'disabled');
             })
 
             $(document).on('click','.btn-edit',function(){
@@ -186,6 +204,10 @@
                 $('.btn-save-edit').addClass('d-none');
                 $('.btn-cancel-edit').addClass('d-none');
                 $('.btn-edit').removeClass('d-none');
+                $('.container-opt').find('input').removeAttr('disabled');
+                $('.container-opt').find('input').attr('required');
+                $('.container-opt').find('select').removeAttr('disabled');
+                $('.container-opt').find('select').attr('required');
                 
                 $(this).addClass('d-none');
                 $(this).closest('.btn-container').find('.btn-save-edit').removeClass('d-none');
@@ -199,6 +221,8 @@
                 var id = $(this).closest('.option-row').data('id');
                 var opt_0 = $(this).closest('.option-row').find('.option-0').val();
                 var opt_1 = $(this).closest('.option-row').find('.option-1').val();
+                var price = $(this).closest('.option-row').find('.option-price').val();
+                var sales_price = $(this).closest('.option-row').find('.option-sales-price').val();
                 var stock = $(this).closest('.option-row').find('.option-stock').val();
                 var url = "{{URL::to('/')}}";
                 url = url+"/product/update-stock/"+id;
@@ -208,6 +232,8 @@
                     data : {
                         opt_0: opt_0,
                         opt_1: opt_1,
+                        price: price,
+                        sales_price: sales_price,
                         stock: stock,
                         _token: "{{ csrf_token() }}",
                     },

@@ -60,7 +60,7 @@
               {data: 'stock_from', defaultContent: 0, name: 'stock_from'},
               {data: 'stock_to', defaultContent: 0, name: 'stock_to'},
               {data: 'created_at', name: 'created_at'},
-              {data: 'created_by', name: 'created_by'},
+              {data: 'name', name: 'name'},
           ],
           order: [
             [0, 'desc']

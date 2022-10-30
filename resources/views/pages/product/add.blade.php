@@ -20,10 +20,24 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="code">Product Code <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" id="code" name="code" value="{{old('code')}}" placeholder="Enter your product code" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label" for="weight">Product Weight <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-lg-6">
+                                    <input type="text" class="form-control" id="weight" name="weight" value="{{old('weight')}}" placeholder="Enter your product weight in grams / pcs" required>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-lg-4 col-form-label" for="description">Product Description
                                 </label>
                                 <div class="col-lg-6">
-                                    <input type="text" class="form-control" id="description" name="description" value="{{old('description')}}" placeholder="Enter your product description" >
+                                    <textarea rows="5" class="form-control" id="description" name="description" placeholder="Enter your product description" > {{old('description')}} </textarea>
                                 </div>
                             </div>
                             <div class="form-group row">

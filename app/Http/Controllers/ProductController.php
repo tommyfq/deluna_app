@@ -133,6 +133,8 @@ class ProductController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
+            'weight' => 'required',
+            'code' => 'required',
             'category' => 'required',
             'option_0' => 'required',
             'type_0' => 'required',
@@ -152,10 +154,10 @@ class ProductController extends Controller {
             Session::flash('message.error', 'Options and Stocks not valid!');
             return redirect()->back()->withInput();
         }
-        // check if category exist
-        $check = Product::where(['name' => $request->name, 'deleted_at' => NULL])->first();
+        // check if product exist
+        $check = Product::where(['code' => $request->code, 'deleted_at' => NULL])->first();
         if($check){
-            Session::flash('message.error', ucwords($this->page).' already exists!');
+            Session::flash('message.error', 'Product Code already exists!');
             return redirect()->back();
         }
         DB::beginTransaction();
@@ -163,6 +165,8 @@ class ProductController extends Controller {
             // create new product
             $product = new Product;
             $product->name = $request->name;
+            $product->weight = $request->weight;
+            $product->code = $request->code;
             $product->category_id = $request->category;
             $product->description = $request->description ? $request->description : '';
             $product->type_1 = $request->type_0;
@@ -245,9 +249,9 @@ class ProductController extends Controller {
         // validation
         $rules = [
             'name' => 'required',
+            'weight' => 'required',
+            'code' => 'required',
             'category' => 'required',
-            'option_0' => 'required',
-            'stocks' => 'required',
             'is_active' => 'required',
         ];
         $custom = [
@@ -257,14 +261,22 @@ class ProductController extends Controller {
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }
-        if(count($request->option_0) != count($request->option_1) && count($request->option_0) != count($request->stocks)){
-            Session::flash('message.error', 'Options and Stocks not valid!');
-            return redirect()->back()->withInput();
+        if($request->option_0){
+            if(count($request->option_0) != count($request->option_1) && count($request->option_0) != count($request->stocks)){
+                Session::flash('message.error', 'Options and Stocks not valid!');
+                return redirect()->back()->withInput();
+            }
         }
-        // check if category exist
+        // check if product exists
         $product = Product::find($slug);
         if(!$product){
             Session::flash('message.error', ucwords($this->page).' doesn\'t exists!');
+            return redirect()->back();
+        }
+        // check if product code exists
+        $check = Product::where(['code' => $request->code, 'deleted_at' => NULL, ['id', '!=', $slug] ])->first();
+        if($check){
+            Session::flash('message.error', 'Product Code already exists!');
             return redirect()->back();
         }
         // update category
@@ -272,36 +284,40 @@ class ProductController extends Controller {
         try {
             $array = [
                 'name' => $request->name,
+                'weight' => $request->weight,
+                'code' => $request->code,
                 'category_id' => $request->category,
                 'description' => $request->description ? $request->description : '',
                 'is_active' => $request->is_active === 'true' ? true: false,
                 'updated_by' => Session::get('user')->id,
             ];
             $product = Product::where('id', $slug)->update($array);
-            for($i=0; $i<count($request->option_0); $i++){
-                $arr = [
-                    'product_id' => $slug,
-                    'option_1'=> $request->option_0[$i]
-                ];
-                if($request->option_1)
-                    $arr['option_2'] = $request->option_1[$i];
-                $stock = Stock::firstOrNew($arr);
-                $stock_from = $stock->stock;
-                if($request->option_1)
-                    $stock->option_2 = $request->option_1[$i];
-                $stock->stock = $stock_from + $request->stocks[$i];
-                $stock->price = $request->price[$i];
-                $stock->sales_price = $request->sales_price[$i];
-                $stock->updated_by = Session::get('user')->id;
-                $stock->save();
-                // insert log
-                $log = new Log;
-                $log->reference_id = $stock->id;
-                $log->type = 'update';
-                $log->stock_from = $stock_from;
-                $log->stock_to = $stock->stock;
-                $log->created_by = Session::get('user')->id;
-                $log->save();
+            if($request->option_0){
+                for($i=0; $i<count($request->option_0); $i++){
+                    $arr = [
+                        'product_id' => $slug,
+                        'option_1'=> $request->option_0[$i]
+                    ];
+                    if($request->option_1)
+                        $arr['option_2'] = $request->option_1[$i];
+                    $stock = Stock::firstOrNew($arr);
+                    $stock_from = $stock->stock;
+                    if($request->option_1)
+                        $stock->option_2 = $request->option_1[$i];
+                    $stock->stock = $stock_from + $request->stocks[$i];
+                    $stock->price = $request->price[$i];
+                    $stock->sales_price = $request->sales_price[$i];
+                    $stock->updated_by = Session::get('user')->id;
+                    $stock->save();
+                    // insert log
+                    $log = new Log;
+                    $log->reference_id = $stock->id;
+                    $log->type = 'update';
+                    $log->stock_from = $stock_from;
+                    $log->stock_to = $stock->stock;
+                    $log->created_by = Session::get('user')->id;
+                    $log->save();
+                }
             }
             DB::commit();
             Session::flash('message.success', ucwords($this->page).' has been updated!');
@@ -390,8 +406,8 @@ class ProductController extends Controller {
         $stock->option_1 = $request->opt_0;
         $stock->option_2 = $request->opt_1;
         $stock->stock = $request->stock;
-        $stock->price = $request->price;
-        $stock->sales_price = $request->sales_price;
+        $stock->price = $request->price ? str_replace([',', '.'], '', $request->price) : 0;
+        $stock->sales_price = $request->sales_price ? str_replace([',', '.'], '', $request->sales_price) : 0;
         $stock->updated_by =Session::get('user')->id;
 
         if($stock->save()){
