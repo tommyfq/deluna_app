@@ -97,14 +97,17 @@ class OrderController extends Controller {
                     $data[$i]['order_no'] = '<a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
                         '.$data[$i]['order_no'].'
                     </a>';
-                    // $data[$i]['action'] = '
-                    // <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
-                    //     <i class="fa fa-pencil color-muted m-r-5"></i> 
-                    // </a>
-                    // <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
-                    //     <i class="fa fa-close color-danger"></i>
-                    // </a>
-                    // ';
+                    $data[$i]['action'] = '
+                    <a href="'.route($this->page.'.edit',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Edit">
+                        <i class="fa fa-pencil color-muted m-r-5"></i> 
+                    </a>
+                    ';
+
+                    /* 
+                    <a href="'.route($this->page.'.delete',[$data[$i]['id']]).'" data-toggle="tooltip" data-placement="top" title="Close">
+                        <i class="fa fa-close color-danger"></i>
+                    </a>
+                    */
                 }
             }
             $json_data = array(

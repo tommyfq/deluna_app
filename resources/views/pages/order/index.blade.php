@@ -30,6 +30,7 @@
                                             <th scope="col">Customer Name</th>
                                             <th scope="col">Customer Phone</th>
                                             <th scope="col">Customer Address</th>
+                                            <th scope="col">Action</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -62,7 +63,8 @@
             {data: 'sales_channel', name: 'sales_channel'},
             {data: 'customer_name', name: 'customer_name'},
             {data: 'customer_phone', name: 'customer_phone'},
-            {data: 'address', name: 'address'}
+            {data: 'address', name: 'address'},
+            {data: 'action', name: 'action'}
           ]
       });
     })

@@ -5,6 +5,16 @@
         tfoot .tfoot-info{
             border:none !important;
         }
+
+        .product-container {
+            overflow-x: scroll;
+        }
+
+        @media screen and (max-width: 720px) {
+            .table-order {
+                width: 800px;
+            }
+        }
     </style>
 @endpush
 <div class="container-fluid">
@@ -18,7 +28,7 @@
                             @csrf
                             <div class="form-group row">
                                 <div class="col-lg-12 ml-auto text-right">
-                                    <button id="btn-submit" type="submit" class="btn btn-primary">Submit</button>
+                                    <button id="btn-submit" type="submit" class="btn btn-primary" disabled>Submit</button>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -67,7 +77,7 @@
                             </div>
                             <hr>
                             <div class="product-container">
-                                <table class="table">
+                                <table class="table table-order">
                                     <thead>
                                         <tr>
                                             <th style="width:30%">Product</th>
@@ -92,7 +102,7 @@
                                                 Please Select the Product First
                                             </td>
                                             <td class="container-product-stock">
-                                                <input type="number" name="quantity[]" class="form-control product-detail-qty" required min="1" value="1"/>
+                                                <input type="number" name="quantity[]" class="form-control product-detail-qty" required/>
                                                 <input type="hidden" name="stock_id[]" class="hidden-stock-id" />
                                                 <label class="product-detall-stock-info">Stock : </label>
                                                 <label class="text-danger alert-stock"></label>
@@ -144,6 +154,7 @@
             $('.product-select2').select2();
 
             $('#btn-add').on('click',function(){
+                $('#btn-submit').attr('disabled','disabled');
                 productCount++;
                 $('.product-detail-container').append(`
                 <tr class="product-detail-row">
@@ -282,7 +293,7 @@
 
                             //Remove Qty
                             var qtyElement = productSelect2.closest('.product-detail-row').find('.product-detail-qty');
-                            qtyElement.val(1);
+                            qtyElement.val("");
                             qtyElement.data('price',0);
                             qtyElement.removeAttr('stock-id');
                             qtyElement.removeAttr('stock-qty');
@@ -298,6 +309,8 @@
                             var subTotalElement = productSelect2.closest('.product-detail-row').find('.product-detail-subtotal');
                             updateSubTotal(subTotalElement,0)
                             calculateTotal();
+
+                            $('#btn-submit').attr('disabled','disabled');
                         }
                         
                     },
@@ -365,6 +378,8 @@
                                 var stockInfo = optionSelect2.closest('.product-detail-row').find('.product-detall-stock-info');
                                 stockInfo.text("Stock : "+result.data.stock);
                                 containerStock.addClass("stock-id-"+result.data.id);
+
+                                $('#btn-submit').removeAttr('disabled');
                             }
                         },
                         error: function (jqXHR, textStatus, errorThrown)
@@ -402,7 +417,7 @@
 
                                 //Remove Qty
                                 var qtyElement = optionSelect.closest('.product-detail-row').find('.product-detail-qty');
-                                qtyElement.val(1);
+                                //qtyElement.val(1);
                                 qtyElement.data('price',0);
                                 qtyElement.removeAttr('stock-id');
                                 qtyElement.removeAttr('stock-qty');
@@ -418,6 +433,8 @@
                                 var subTotalElement = optionSelect2.closest('.product-detail-row').find('.product-detail-subtotal');
                                 updateSubTotal(subTotalElement,0)
                                 calculateTotal();
+
+                                $('#btn-submit').attr('disabled','disabled');
                             }
                             
                         },
@@ -486,6 +503,7 @@
                             containerStock.addClass("stock-id-"+result.data.id);
                             console.log(containerStock.attr('class'));
 
+                            $('#btn-submit').removeAttr('disabled');
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown)
@@ -495,7 +513,7 @@
                 });
             })
 
-            $(document).on('keyup','.product-detail-qty',function(e){
+            $(document).on('change','.product-detail-qty',function(e){
                 var inputQty = $(this)
                 var inp = inputQty.val();
                 var subTotalElement = inputQty.closest('.product-detail-row').find('.product-detail-subtotal');
@@ -503,25 +521,32 @@
                 console.log($(this).data('stock-id'));
                 console.log($(this).data('stock-qty'));
                 var stockQty = $(this).data('stock-qty');
+                console.log($(this).val());
                 if( $(this).val().length !== 0 ) {
                     if(parseInt($(this).val()) < 0){
                         $(this).val(1)
+                        //$('#btn-submit').attr('disabled','disabled');
+                        return
+                        
                     }
                 }else{
-                    $(this).val(1)
+                    $('#btn-submit').attr('disabled','disabled');
+                    return
+                    //$(this).val(1)
                 }
 
                 var qty = $(this).val();
                 var alertStock = inputQty.closest('.product-detail-row').find('.alert-stock');
                 if(qty > stockQty){
-                    alertStock.text('Not enough stock');
-                    $(this).val(1);
+                    alertStock.text('Not enough stock for '+inp);
+                    //$(this).val(1);
                     return;
                 }else{
                     alertStock.text('');
                     var subTotal = qty*price
                     updateSubTotal(subTotalElement,subTotal)
                     calculateTotal();
+                    $('#btn-submit').removeAttr('disabled');
                 }
 
                 // if( $(this).val().length === 0 ) {

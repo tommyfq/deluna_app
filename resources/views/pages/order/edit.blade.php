@@ -5,6 +5,16 @@
         tfoot .tfoot-info{
             border:none !important;
         }
+
+        .product-container {
+            overflow-x: scroll;
+        }
+
+        @media screen and (max-width: 720px) {
+            .table-order {
+                width: 800px;
+            }
+        }
     </style>
 @endpush
 <div class="container-fluid">
@@ -81,7 +91,7 @@
                             </div>
                             <hr>
                             <div class="product-container">
-                                <table class="table">
+                                <table class="table table-order">
                                     <thead>
                                         <tr>
                                             <th style="width:30%">Product</th>
