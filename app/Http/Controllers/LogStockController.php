@@ -12,6 +12,7 @@ use App\Models\Stock;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Option;
+use App\Models\User;
 use DB;
 use DataTables;
 
@@ -79,6 +80,9 @@ class LogStockController extends Controller {
                             ->leftJoin(with(new Product)->getTable().' as p', function($join){
                                 $join->on('p.id', 's.product_id');
                                 $join->orOn('od.product_id', 'p.id');
+                            })
+                            ->leftJoin(with(new User)->getTable().' as u', function($join){
+                                $join->on('u.id', with(new Log)->getTable().'.created_by');
                             });
             if(!empty($search)){
                 $models->where(function($query) use ($search){
@@ -108,7 +112,7 @@ class LogStockController extends Controller {
             $models = $models->offset($start)
                     ->limit($limit)
                     ->orderBy($order,$dir)
-                    ->get([with(new Log)->getTable().'.*', 'o.order_no', 'p.name as product', 'opt1.name as option_1', 'opt2.name as option_2']);
+                    ->get([with(new Log)->getTable().'.*', 'o.order_no', 'p.name as product', 'opt1.name as option_1', 'opt2.name as option_2', 'u.name']);
 
             $data = $models->toArray();
 

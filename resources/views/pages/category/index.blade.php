@@ -25,7 +25,6 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">Name</th>
-                                            <th scope="col">Type</th>
                                             <th scope="col">Active</th>
                                             <th scope="col">Action</th>
                                         </tr>
@@ -53,7 +52,6 @@
           ajax: "{{ route($_page.'.list') }}",
           columns: [
               {data: 'name', name: 'name'},
-              {data: 'type', name: 'type'},
               {data: 'is_active', name: 'active'},
               {
                   data: 'action', 

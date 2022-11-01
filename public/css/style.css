@@ -14699,4 +14699,11 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
     [data-theme-version="dark"] .footer .copyright p {
       color: #fff; }
 
+.dataTables_filter input {
+  border: 1px solid #ced4da !important;
+}
+.dataTables_length select {
+  border: 1px solid #ced4da !important;
+}
+
 /*# sourceMappingURL=style.css.map */
