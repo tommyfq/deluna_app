@@ -9521,7 +9521,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
     padding-right: 5px; }
   .login-form__btn.submit {
     padding: 15px 40px;
-    background: #7571f9;
+    background: #F2E6DD;
     font-weight: 700; }
 
 .login-form__intro p, .login-form__intro h4 {
@@ -14010,7 +14010,7 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
   padding-right: 15rem; }
 
 [data-nav-headerbg="color_1"] .nav-header {
-  background-color: #7571f9; }
+  background-color: #F2E6DD; }
 
 [data-nav-headerbg="color_2"] .nav-header {
   background-color: #27394F !important; }
@@ -14706,4 +14706,23 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
   border: 1px solid #ced4da !important;
 }
 
+@media screen and (max-width: 767px){
+  .dataTables_filter{
+      float:left !important;
+      text-align: left !important;
+  }
+
+  .col-md-6:has(> .dataTables_filter){
+      padding-left:0px;
+  }
+  
+}
+
+@media screen and (max-width: 767px){
+  .header {
+    position: fixed;
+    left: auto;
+    z-index: 9; 
+  }
+}
 /*# sourceMappingURL=style.css.map */

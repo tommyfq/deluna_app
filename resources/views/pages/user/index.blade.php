@@ -8,11 +8,11 @@
                 <div class="card-body">
                     @include('_includes.alert')
                     <div class="row">
-                        <div class="col">
+                        <div class="col-12 col-md-6">
                             <h4 class="card-title">User Menu</h4>
                             <p class="text-muted m-b-15 f-s-12">You can see the list of users, add, edit and delete User.</p>
                         </div>
-                        <div class="col">
+                        <div class="col-12 col-md-6">
                             @if($_role->add)
                             <a href="{{route('user.add')}}" class="btn mb-1 btn-primary float-right">Add User</a>
                             @endif
